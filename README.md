@@ -1,4 +1,10 @@
-Простой фрейворк от Каспи-Софт www.kaspi.ru
+# Простой фрейворк от Каспи-Софт www.kaspi.ru
+
+Установка пакета через composer
+
+``
+composer require kaspi/kapi-framework 
+``
 
 ## Скоро будет описание
   
