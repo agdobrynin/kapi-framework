@@ -22,6 +22,7 @@
       "Kaspi\\": "src/kaspi"
     },
     "files": [
+      "src/kaspi/helpers/helpers.php"
     ]
   },
   "require-dev": {
