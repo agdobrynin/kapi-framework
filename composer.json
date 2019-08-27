@@ -1,6 +1,6 @@
 {
   "name": "kaspi/kapi-framework",
-  "description": "A Kaspi Framework skeleton application for rapid development",
+  "description": "A Kaspi Framework - simple MVC web application",
   "keywords": ["framework","micro","api","router"],
   "license": "MIT",
   "authors": [
