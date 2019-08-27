@@ -1,0 +1,33 @@
+{
+  "name": "kaspi/kapi-framework",
+  "description": "A Kaspi Framework skeleton application for rapid development",
+  "keywords": ["framework","micro","api","router"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Alexei Dobrynin",
+      "email": "ag.dobrynin@gmail.com",
+      "homepage": "http://kaspi.ru"
+    }
+  ],
+  "require": {
+    "php": "^7.2",
+    "ext-pdo": "*",
+    "ext-json": "*",
+    "ralouphie/getallheaders": "^3.0.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Kaspi\\": "src/kaspi"
+    },
+    "files": [
+    ]
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^2.15",
+    "roave/security-advisories": "dev-master"
+  },
+  "scripts": {
+    "code-style" : "sh vendor/bin/php-cs-fixer fix"
+  }
+}

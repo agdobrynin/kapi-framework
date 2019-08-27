@@ -1,0 +1,21 @@
+<?php
+
+$finder = PhpCsFixer\Finder::create()->in(__DIR__);
+
+return PhpCsFixer\Config::create()
+    ->setRules([
+        '@Symfony' => true,
+        '@PHP73Migration' => true,
+        'linebreak_after_opening_tag' => true,
+        'ordered_imports' => [
+            'sort_algorithm' => 'alpha',
+            'imports_order' => ['class', 'function', 'const'],
+        ],
+        'list_syntax' => [
+            'syntax' => 'short'
+        ],
+        'no_superfluous_phpdoc_tags' => true,
+        'simplified_null_return' => true,
+    ])
+    ->setFinder($finder)
+;
