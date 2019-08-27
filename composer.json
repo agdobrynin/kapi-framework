@@ -24,8 +24,7 @@
     ]
   },
   "require-dev": {
-    "friendsofphp/php-cs-fixer": "^2.15",
-    "roave/security-advisories": "dev-master"
+    "friendsofphp/php-cs-fixer": "^2.15"
   },
   "scripts": {
     "code-style" : "sh vendor/bin/php-cs-fixer fix"
