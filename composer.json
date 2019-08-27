@@ -10,8 +10,6 @@
       "homepage": "http://kaspi.ru"
     }
   ],
-  "minimum-stability": "stable",
-  "prefer-stable": true,
   "require": {
     "php": "^7.2",
     "ext-pdo": "*",
