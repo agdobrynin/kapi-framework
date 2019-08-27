@@ -10,7 +10,7 @@
       "homepage": "http://kaspi.ru"
     }
   ],
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "prefer-stable": true,
   "require": {
     "php": "^7.2",
