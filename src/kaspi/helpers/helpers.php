@@ -30,3 +30,9 @@ if (false === function_exists('Kaspi\helpers\getCurrentRoute')) {
         return Router::getCurrentRouteName();
     }
 }
+
+if (false === function_exists('Kaspi\helpers\isRoute')) {
+    function isRoute(string $route): bool {
+        return $route === getCurrentRoute();
+    }
+}
