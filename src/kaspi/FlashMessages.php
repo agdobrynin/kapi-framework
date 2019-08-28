@@ -58,7 +58,7 @@ final class FlashMessages
 
     public static function displayAsObjects(string $type): ?object
     {
-        return json_decode(
+        return (object)json_decode(
             json_encode(self::display($type)),
             false
         );
