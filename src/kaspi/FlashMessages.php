@@ -11,24 +11,35 @@ final class FlashMessages
 
     private const FlashNamespace = '_FLASH_MESSAGES_';
 
-    public static function add(string $value, string $type): void
+    public static function addSuccess(string $value, ?string $key = null): void
     {
-        if ($arrMessages = $_SESSION[self::FlashNamespace] ?? null) {
-            $arrMessages[$type][] = $value;
+        self::add($value, self::SUCCESS, $key);
+    }
+
+    public static function addInfo(string $value, ?string $key = null): void
+    {
+        self::add($value, self::INFO, $key);
+    }
+
+    public static function addWarning(string $value, ?string $key = null): void
+    {
+        self::add($value, self::WARNING, $key);
+    }
+
+    public static function addError(string $value, ?string $key = null): void
+    {
+        self::add($value, self::ERROR, $key);
+    }
+
+    public static function add(string $value, string $type, ?string $key = null): void
+    {
+        $arrMessages = $_SESSION[self::FlashNamespace] ?? [];
+        if ($key) {
+            $arrMessages[$type][$key] = $value;
         } else {
             $arrMessages[$type][] = $value;
         }
         $_SESSION[self::FlashNamespace] = $arrMessages;
-    }
-
-    public static function has(?string $type = null): bool
-    {
-        $arrMessages = $_SESSION[self::FlashNamespace] ?? [];
-        if (null === $type) {
-            return count($arrMessages) > 0;
-        }
-
-        return isset($arrMessages[$type]) && count($arrMessages[$type]) > 0;
     }
 
     public static function display(string $type): ?array
@@ -43,5 +54,13 @@ final class FlashMessages
         }
 
         return null;
+    }
+
+    public static function displayAsObjects(string $type): ?object
+    {
+        return json_decode(
+            json_encode(self::display($type)),
+            false
+        );
     }
 }
