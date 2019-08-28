@@ -4,24 +4,10 @@ namespace Kaspi\helpers;
 use Kaspi\FlashMessages;
 use Kaspi\Router;
 
-if (false === function_exists('Kaspi\helpers\flashErrors')) {
-    function flashErrors(): ?array
+if (false === function_exists('Kaspi\helpers\flashMessages')) {
+    function flashMessages(): FlashMessages
     {
-        return FlashMessages::display(FlashMessages::ERROR);
-    }
-}
-
-if (false === function_exists('Kaspi\helpers\flashSuccess')) {
-    function flashSuccess(): ?array
-    {
-        return FlashMessages::display(FlashMessages::SUCCESS);
-    }
-}
-
-if (false === function_exists('Kaspi\helpers\flashWarning')) {
-    function flashWarning(): ?array
-    {
-        return FlashMessages::display(FlashMessages::WARNING);
+        return new FlashMessages();
     }
 }
 
