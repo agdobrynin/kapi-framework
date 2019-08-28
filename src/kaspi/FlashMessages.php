@@ -8,6 +8,7 @@ final class FlashMessages
     public const SUCCESS = 'success';
     public const WARNING = 'warning';
     public const ERROR = 'error';
+    public const FROM_VALIDATOR = 'fromValidator';
 
     private const FlashNamespace = '_FLASH_MESSAGES_';
 
