@@ -12,6 +12,11 @@ final class FlashMessages
 
     private const FlashNamespace = '_FLASH_MESSAGES_';
 
+    public static function addFormValidator(string $value, ?string $key = null): void
+    {
+        self::add($value, self::FROM_VALIDATOR, $key);
+    }
+
     public static function addSuccess(string $value, ?string $key = null): void
     {
         self::add($value, self::SUCCESS, $key);
