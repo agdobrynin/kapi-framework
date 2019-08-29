@@ -29,9 +29,10 @@ class View
         $this->globalData[$key] = $data;
     }
 
-    public function include(string $fileName): void
+    public function include(string $fileName, array $data = []): void
     {
-        extract($this->globalData, EXTR_OVERWRITE);
+        $data = array_merge($data, $this->globalData);
+        extract($data, EXTR_OVERWRITE);
         include $this->viewPath . $fileName;
     }
 
