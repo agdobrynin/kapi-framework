@@ -6,6 +6,10 @@ class Request
 {
     /** @var array */
     protected $request;
+    /** @var array из $_SERVER */
+    protected $server;
+    /** @var array из $_COOKIE */
+    protected $cookie;
     /** @var array */
     protected $headers = [];
     /** @var string */
@@ -33,6 +37,10 @@ class Request
         $this->uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
         $this->requestMethod = strtoupper($_SERVER['REQUEST_METHOD']);
         $this->headers = getallheaders() ?: [];
+        // SERVER переменные
+        $this->server = $_SERVER;
+        // Cookie переданные с клиента
+        $this->cookie = $_COOKIE;
     }
 
     protected function getRequestInput(): void
@@ -90,6 +98,22 @@ class Request
     public function isValidRequestMethod(): bool
     {
         return in_array($this->getRequestMethod(), self::METHOD_AVAILABLE, false);
+    }
+
+    /**
+     * получение серверных переменных.
+     */
+    public function getEnv(string $key): ?string
+    {
+        return $this->server[$key] ?? null;
+    }
+
+    /**
+     * Полученные с клиента Cookie
+     */
+    public function getCookie(string $key): ?string
+    {
+        return $this->cookie[$key] ?? null;
     }
 
     public function getParam(string $key): ?string
