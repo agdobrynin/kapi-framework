@@ -133,8 +133,8 @@ final class Router
      */
     public function add(string $route, $callable, ?string $requestMethod = '', ?string $name = null): void
     {
-        // Проверка на добавление только разрешенные методы
-        if (!empty($requestMethod) && !$this->request->isValidRequestMethod()) {
+        // Проверка на добавление только разрешенные методы запросов
+        if (!$this->request->isValidRequestMethod()) {
             throw new RouterException(
                 sprintf('Request method `%s` is not support', $requestMethod),
                 ResponseCode::METHOD_NOT_ALLOWED
