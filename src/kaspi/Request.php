@@ -11,7 +11,7 @@ class Request
     /** @var array из $_COOKIE */
     protected $cookie;
     /** @var array */
-    protected $headers = [];
+    protected $headers;
     /** @var string */
     protected $uri;
     /** @var string */
@@ -36,11 +36,6 @@ class Request
     {
         $this->uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
         $this->requestMethod = strtoupper($_SERVER['REQUEST_METHOD']);
-        $this->headers = getallheaders() ?: [];
-        // SERVER переменные
-        $this->server = $_SERVER;
-        // Cookie переданные с клиента
-        $this->cookie = $_COOKIE;
     }
 
     protected function getRequestInput(): void
@@ -105,6 +100,10 @@ class Request
      */
     public function getEnv(string $key): ?string
     {
+        // SERVER переменные
+        if (null === $this->server){
+            $this->server = $_SERVER;
+        }
         return $this->server[$key] ?? null;
     }
 
@@ -113,6 +112,10 @@ class Request
      */
     public function getCookie(string $key): ?string
     {
+        // Cookie переданные с клиента
+        if (null === $this->cookie) {
+            $this->cookie = $_COOKIE;
+        }
         return $this->cookie[$key] ?? null;
     }
 
@@ -163,6 +166,9 @@ class Request
 
     public function getHeader(string $header): ?string
     {
+        if (null === $this->headers) {
+            $this->headers = getallheaders() ?: [];
+        }
         return $this->headers[$header] ?? null;
     }
 
