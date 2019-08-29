@@ -131,7 +131,7 @@ EOF;
             $body = $this->exceptionTemplate(ResponseCode::PHRASES[$exceptionCode], $exceptionMessage);
             $this->response->setBody($body);
         }
-        $requestTimeFloat = (float) str_replace(',', '.', $this->request->getParam('REQUEST_TIME_FLOAT'));
+        $requestTimeFloat = (float) str_replace(',', '.', $this->request->getEnv('REQUEST_TIME_FLOAT'));
         if ($time = (microtime(true) - $requestTimeFloat)) {
             $this->response->setHeader('X-Generation-time', $time);
         }
