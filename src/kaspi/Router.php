@@ -20,6 +20,8 @@ final class Router
     private $response;
     /** @var Container|null */
     private $container;
+    /** @var Config */
+    private $config;
 
     protected const ROUTE_METHOD = 'ROUTE_METHOD';
     protected const ROUTE_ACTION = 'ROUTE_ACTION';
@@ -55,6 +57,27 @@ final class Router
     public function post(string $route, $callable): self
     {
         $this->add($route, $callable, $this->request::METHOD_POST);
+
+        return $this;
+    }
+
+    public function put(string $route, $callable): self
+    {
+        $this->add($route, $callable, $this->request::METHOD_PUT);
+
+        return $this;
+    }
+
+    public function delete(string $route, $callable): self
+    {
+        $this->add($route, $callable, $this->request::METHOD_DELETE);
+
+        return $this;
+    }
+
+    public function patch(string $route, $callable): self
+    {
+        $this->add($route, $callable, $this->request::METHOD_PATCH);
 
         return $this;
     }
@@ -106,10 +129,17 @@ final class Router
      * @param string $requestMethod request method
      * @param string|null $name     имя роута
      *
-     * @throws AppException
+     * @throws AppException|RouterException
      */
     public function add(string $route, $callable, ?string $requestMethod = '', ?string $name = null): void
     {
+        // Проверка на добавление только разрешенные методы
+        if (!empty($requestMethod) && !$this->request->isValidRequestMethod()) {
+            throw new RouterException(
+                sprintf('Request method `%s` is not support', $requestMethod),
+                ResponseCode::METHOD_NOT_ALLOWED
+            );
+        }
         // контроллер
         if (is_string($callable)) {
             if (false !== strpos($callable, $this->defaultActionSymbol)) {
@@ -138,7 +168,7 @@ final class Router
             if (is_callable($middleware)) {
                 $next = $this->routes[$route][self::ROUTE_ACTION];
                 $callable = new $middleware($this->request, $this->response, $this->container, $next);
-                if ($res = call_user_func($callable)) {
+                if ($res = $callable()) {
                     return true;
                 }
             }
@@ -193,12 +223,12 @@ final class Router
         }
         if (isset($isValidRout)) {
             throw new RouterException(
-                'Method not allowed at route ' . $this->request->uri(),
+                sprintf('Method not allowed at route %s', $this->request->uri()),
                 ResponseCode::METHOD_NOT_ALLOWED
             );
         }
         throw new RouterException(
-            'Route ' . $this->request->uri() . ' not resolved',
+            sprintf('Route %s not resolved', $this->request->uri()),
             ResponseCode::NOT_FOUND
         );
     }
