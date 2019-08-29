@@ -76,6 +76,21 @@ class App
         return $this->router->post($route, $callable);
     }
 
+    public function put($route, $callable): Router
+    {
+        return $this->router->put($route, $callable);
+    }
+
+    public function patch($route, $callable): Router
+    {
+        return $this->router->patch($route, $callable);
+    }
+
+    public function delete($route, $callable): Router
+    {
+        return $this->router->delete($route, $callable);
+    }
+
     public function any($route, $callable): Router
     {
         return $this->router->any($route, $callable);
