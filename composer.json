@@ -30,6 +30,6 @@
     "roave/security-advisories": "dev-master"
   },
   "scripts": {
-    "code-style" : "sh vendor/bin/php-cs-fixer fix"
+    "php-cs-fixer" : "sh vendor/bin/php-cs-fixer fix"
   }
 }
