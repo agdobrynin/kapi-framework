@@ -2,16 +2,26 @@
 
 namespace Kaspi;
 
+use Kaspi\Exception\ConfigException;
 use Kaspi\Exception\ViewException;
 
 class View
 {
     private $viewPath;
     private $globalData = [];
+    private $layout;
+    private $sections;
+    private $useExtension;
+    public const DEFAULT_SECTION = 'content';
 
     public function __construct(Config $config)
     {
-        $this->viewPath = realpath($config->getViewPath()).'/';
+        try {
+            $this->viewPath = realpath($config->getViewPath()) . '/';
+        } catch (ConfigException $exception) {
+            throw new ViewException($exception->getMessage());
+        }
+        $this->useExtension = $config->getViewUseTemplateExtension();
     }
 
     public function addGlobalData(string $key, $data): void
@@ -19,20 +29,69 @@ class View
         $this->globalData[$key] = $data;
     }
 
+    public function include(string $fileName): void
+    {
+        extract($this->globalData, EXTR_OVERWRITE);
+        include $this->viewPath . $fileName;
+    }
+
+    /**
+     * Расширение существующего шаблона из текущего
+     *
+     * @param string $layout путь к расширяемому шаблону
+     * @param array $data    переменные передаваемые в шаблон
+     */
+    private function layout(string $layout, array $data = []): void
+    {
+        $this->layout->template = $layout;
+        $this->layout->data = $data;
+    }
+
+    /**
+     * Объявление секции которую можно использовать по имени в расширяеомо шаблоне
+     *
+     * @param string $sectionName Имя секции отличное от дефолтной
+     */
+    private function sectionStart(string $sectionName): void
+    {
+        ob_start();
+        $this->sections[$sectionName] = '';
+    }
+
+    private function sectionEnd()
+    {
+        $lastSectionName = key(array_slice($this->sections, -1, 1, true));
+        $this->sections[$lastSectionName] = ob_get_contents();
+        ob_end_clean();
+    }
+
+    private function section(?string $sectionName = null): void
+    {
+        if (empty($sectionName)) {
+            $sectionName = self::DEFAULT_SECTION;
+        }
+        echo $this->sections[$sectionName];
+    }
+
+
     public function render(string $template, array $data = []): string
     {
-        $template = $this->viewPath.$template;
+
+        $template = $this->viewPath . $template . ($this->useExtension ? '' : '.php');
         if (file_exists($template)) {
-            error_reporting(E_ERROR | E_WARNING | E_PARSE);
+            $this->layout = new \StdClass;
             $data = array_merge($data, $this->globalData);
             extract($data, EXTR_OVERWRITE);
             ob_start();
             include $template;
-            $content = ob_get_contents();
+            $this->sections[self::DEFAULT_SECTION] = ob_get_contents();
+            if (!empty($this->layout->template)) {
+                $this->render($this->layout->template, array_merge($data, $this->layout->data));
+            }
+            $content = $this->sections[self::DEFAULT_SECTION];
             ob_end_clean();
-
             return $content;
         }
-        throw new ViewException('View does not exist: '.$template);
+        throw new ViewException('View does not exist: ' . $template);
     }
 }

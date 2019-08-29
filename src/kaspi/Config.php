@@ -39,7 +39,24 @@ class Config
 
     public function getViewPath(): ?string
     {
-        return $this->config['view'] ?: null;
+        $path = $this->config['view']['path'] ?: null;
+        if (empty($path)) {
+            throw new ConfigException('Path to templates for Kaspi\View is undefined');
+        }
+        if (!is_dir($path)) {
+            throw new ConfigException(sprintf('Directory `%s` for templates not found', $path));
+        }
+        return $path;
+    }
+
+    public function getViewUseTemplateExtension(): bool
+    {
+        return $this->config['view']['useExtension'] ?: false;
+    }
+
+    public function getViewConf(): ?array
+    {
+        return $this->config['view'];
     }
 
     public function getCsrfTtl(): ?int
