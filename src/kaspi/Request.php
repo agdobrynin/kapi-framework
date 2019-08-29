@@ -14,23 +14,47 @@ class Request
     protected $requestMethod;
     protected $attributes = [];
 
-    public const METHOD_POST = 'post';
-    public const METHOD_GET = 'get';
+    public const METHOD_POST = 'POST';
+    public const METHOD_GET = 'GET';
+    public const METHOD_PUT = 'PUT';
+    public const METHOD_PATCH = 'PATCH';
+    public const METHOD_DELETE = 'DELETE';
+
     public const METHOD_AVAILABLE = [
         self::METHOD_GET,
         self::METHOD_POST,
+        self::METHOD_PUT,
+        self::METHOD_PATCH,
+        self::METHOD_DELETE,
     ];
 
     public function __construct()
     {
-        $this->request = array_merge(
-            $_POST,
-            $_GET,
-            $_SERVER
-        );
         $this->uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-        $this->requestMethod = strtolower($_SERVER['REQUEST_METHOD']);
+        $this->requestMethod = strtoupper($_SERVER['REQUEST_METHOD']);
         $this->headers = getallheaders() ?: [];
+    }
+
+    protected function getRequestInput(): void
+    {
+        // GET или POST из глобальных переменных PHP
+        if ($this->isPost()) {
+            $this->request = $_POST;
+            return;
+        }
+
+        if ($this->isGet()) {
+            $this->request = $_GET;
+            return;
+        }
+
+        // PUT, PATCH, DELETE
+        if ($this->isPut() || $this->isPatch() || $this->isDelete()) {
+            $this->request = [];
+            $inputSource = file_get_contents('php://input');
+            parse_str($inputSource, $this->request);
+            return;
+        }
     }
 
     public function getRequestMethod(): string
@@ -48,8 +72,31 @@ class Request
         return self::METHOD_GET === $this->getRequestMethod();
     }
 
+    public function isPut(): bool
+    {
+        return self::METHOD_PUT === $this->getRequestMethod();
+    }
+
+    public function isDelete(): bool
+    {
+        return self::METHOD_DELETE === $this->getRequestMethod();
+    }
+
+    public function isPatch(): bool
+    {
+        return self::METHOD_PATCH === $this->getRequestMethod();
+    }
+
+    public function isValidRequestMethod(): bool
+    {
+        return in_array($this->getRequestMethod(), self::METHOD_AVAILABLE, false);
+    }
+
     public function getParam(string $key): ?string
     {
+        if (null === $this->request) {
+            $this->getRequestInput();
+        }
         return $this->request[$key] ?? null;
     }
 
