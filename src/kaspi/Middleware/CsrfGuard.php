@@ -32,14 +32,19 @@ class CsrfGuard extends Middleware
 
     public function __invoke()
     {
-        if ($this->getRequest()->isPost()) {
-            $token = (string) $this->getRequest()->getParam($this->tokenKey) ?: $this->getRequest()->getHeader($this->tokenKey);
+        // Реагировать на Csrf защиту надо методам которые могут изменить данные в приложении.
+        $isNeedCheck = in_array(
+            $this->getRequest()->getRequestMethod(),
+            [Request::METHOD_POST, Request::METHOD_PATCH, Request::METHOD_PUT, Request::METHOD_DELETE],
+            true
+        );
+        if ($isNeedCheck) {
+            $token = (string)$this->getRequest()->getParam($this->tokenKey) ?: $this->getRequest()->getHeader($this->tokenKey);
             $this->isValidToken($token);
         }
 
         $token = $this->createToken();
 
-        $this->getResponse()->setHeader($this->tokenKey, $token);
         try {
             $this->getContainer()
                 ->get('view')
