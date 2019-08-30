@@ -11,8 +11,8 @@ use function setlocale;
 
 class App
 {
-    public static const APP_PROD = 'PROD';
-    public static const APP_DEV = 'DEV';
+    public const APP_PROD = 'PROD';
+    public const APP_DEV = 'DEV';
     /** @var Request */
     private $request;
     /** @var Response */
