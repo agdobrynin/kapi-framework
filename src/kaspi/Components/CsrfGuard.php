@@ -9,7 +9,7 @@ use Kaspi\Request;
 class CsrfGuard
 {
     /** @var string имя токена (ключ) */
-    private $tokenKey;
+    private $tokenName;
     /** @var string текущее значение токена */
     private $tokenValue;
     /** @var int дина токена */
@@ -20,13 +20,13 @@ class CsrfGuard
     public function __construct(?Config $config = null)
     {
         // дефолтные зданчения
-        $this->tokenKey = 'xCsrf';
+        $this->tokenName = 'xCsrf';
         $this->strength = 32;
         $this->ttl = 1800;
 
         if (null !== $config) {
-            if ($tokenKey = $config->getCsrfKey()) {
-                $this->tokenKey = $tokenKey;
+            if ($tokenName = $config->getCsrfName()) {
+                $this->tokenName = $tokenName;
             }
             if ($strength = $config->getCsrfLength()) {
                 $this->strength = $strength;
@@ -46,7 +46,7 @@ class CsrfGuard
             true
         );
         if ($isNeedCheck) {
-            $token = (string) $request->getParam($this->tokenKey) ?: $request->getHeader($this->tokenKey);
+            $token = (string) $request->getParam($this->tokenName) ?: $request->getHeader($this->tokenName);
             $this->isValidToken($token);
         }
 
@@ -60,13 +60,13 @@ class CsrfGuard
 
     public function getTokenName(): string
     {
-        return $this->tokenKey;
+        return $this->tokenName;
     }
 
     private function createToken(): string
     {
         $token = bin2hex(random_bytes($this->strength));
-        $_SESSION[$this->tokenKey] = ['token' => $token, 'ttl' => time() + $this->ttl];
+        $_SESSION[$this->tokenName] = ['token' => $token, 'ttl' => time() + $this->ttl];
 
         return $token;
     }
@@ -74,10 +74,10 @@ class CsrfGuard
     private function isValidToken(?string $token): void
     {
         // TODO проверять наличие SESSION или еще лучше перейти на класс декоратор типа SessionStorage
-        if ($_SESSION[$this->tokenKey]['ttl'] < time()) {
+        if ($_SESSION[$this->tokenName]['ttl'] < time()) {
             throw new CsrfGuardException('Csrf token key is expired');
         }
-        if ($_SESSION[$this->tokenKey]['token'] !== $token) {
+        if ($_SESSION[$this->tokenName]['token'] !== $token) {
             throw new CsrfGuardException('Csrf token key is wrong');
         }
     }

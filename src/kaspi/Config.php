@@ -65,9 +65,9 @@ class Config
         return $this->config['csrf']['ttl'] ?: null;
     }
 
-    public function getCsrfKey(): ?string
+    public function getCsrfName(): ?string
     {
-        return $this->config['csrf']['key'] ?: null;
+        return $this->config['csrf']['name'] ?: null;
     }
 
     public function getCsrfLength(): ?int
