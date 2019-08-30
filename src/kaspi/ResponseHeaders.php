@@ -18,6 +18,6 @@ class ResponseHeaders
 
     public function get(): array
     {
-        return $this->headers;
+        return $this->headers ?? [];
     }
 }
