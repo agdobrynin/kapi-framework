@@ -1,14 +1,10 @@
 <?php
-/**
- * В формах с POST методом вызвать переменную <?php echo $xCsrf?>.
- */
 
 namespace Kaspi\Middleware;
 
 use Kaspi\App;
 use Kaspi\Container;
-use Kaspi\Exception\AppException;
-use Kaspi\Exception\ContainerException;
+use Kaspi\Exception\MiddlewareException;
 use Kaspi\Middleware;
 use Kaspi\Request;
 use Kaspi\Response;
@@ -17,6 +13,8 @@ class CsrfGuard extends Middleware
 {
     /** @var string имя токена (ключ) */
     private $tokenKey;
+    /** @var string текущее значение токена */
+    private $tokenValue;
     /** @var int дина токена */
     private $strength;
     /** @var int время истечения токена */
@@ -30,7 +28,7 @@ class CsrfGuard extends Middleware
         $this->ttl = App::getConfig()->getCsrfTtl() ?? 1800;
     }
 
-    public function __invoke()
+    public function verify()
     {
         // Реагировать на Csrf защиту надо методам которые могут изменить данные в приложении.
         $isNeedCheck = in_array(
@@ -39,21 +37,24 @@ class CsrfGuard extends Middleware
             true
         );
         if ($isNeedCheck) {
-            $token = (string)$this->getRequest()->getParam($this->tokenKey) ?: $this->getRequest()->getHeader($this->tokenKey);
+            $token = (string) $this->getRequest()->getParam($this->tokenKey) ?: $this->getRequest()->getHeader($this->tokenKey);
             $this->isValidToken($token);
         }
 
-        $token = $this->createToken();
-
-        try {
-            $this->getContainer()
-                ->get('view')
-                ->addGlobalData($this->tokenKey, "<input type='hidden' value='{$token}' name='{$this->tokenKey}'>");
-        } catch (ContainerException $exception) {
-        }
+        $this->tokenValue = $this->createToken();
     }
 
-    protected function createToken(): string
+    public function getTokenValue(): string
+    {
+        return $this->tokenValue;
+    }
+
+    public function getTokenName(): string
+    {
+        return $this->tokenKey;
+    }
+
+    private function createToken(): string
     {
         $token = bin2hex(random_bytes($this->strength));
         $_SESSION[$this->tokenKey] = ['token' => $token, 'ttl' => time() + $this->ttl];
@@ -61,13 +62,13 @@ class CsrfGuard extends Middleware
         return $token;
     }
 
-    protected function isValidToken(?string $token): void
+    private function isValidToken(?string $token): void
     {
         if ($_SESSION[$this->tokenKey]['ttl'] < time()) {
-            throw new AppException('Csrf token key is expired');
+            throw new MiddlewareException('Csrf token key is expired');
         }
         if ($_SESSION[$this->tokenKey]['token'] !== $token) {
-            throw new AppException('Csrf token key is wrong');
+            throw new MiddlewareException('Csrf token key is wrong');
         }
     }
 }
