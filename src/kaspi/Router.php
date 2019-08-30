@@ -48,44 +48,44 @@ final class Router
         return $this->container;
     }
 
-    public function get(string $route, $callable): self
+    public function get(string $routePattern, $callable): self
     {
-        $this->add($route, $callable, $this->request::METHOD_GET);
+        $this->map($routePattern, $callable, $this->request::METHOD_GET);
 
         return $this;
     }
 
-    public function post(string $route, $callable): self
+    public function post(string $routePattern, $callable): self
     {
-        $this->add($route, $callable, $this->request::METHOD_POST);
+        $this->map($routePattern, $callable, $this->request::METHOD_POST);
 
         return $this;
     }
 
-    public function put(string $route, $callable): self
+    public function put(string $routePattern, $callable): self
     {
-        $this->add($route, $callable, $this->request::METHOD_PUT);
+        $this->map($routePattern, $callable, $this->request::METHOD_PUT);
 
         return $this;
     }
 
-    public function delete(string $route, $callable): self
+    public function delete(string $routePattern, $callable): self
     {
-        $this->add($route, $callable, $this->request::METHOD_DELETE);
+        $this->map($routePattern, $callable, $this->request::METHOD_DELETE);
 
         return $this;
     }
 
-    public function patch(string $route, $callable): self
+    public function patch(string $routePattern, $callable): self
     {
-        $this->add($route, $callable, $this->request::METHOD_PATCH);
+        $this->map($routePattern, $callable, $this->request::METHOD_PATCH);
 
         return $this;
     }
 
-    public function any(string $route, $callable): self
+    public function any(string $routePattern, $callable): self
     {
-        $this->add($route, $callable);
+        $this->map($routePattern, $callable);
 
         return $this;
     }
@@ -151,7 +151,7 @@ final class Router
      *
      * @throws RouterException
      */
-    public function add(string $routePattern, $callable, ?string $requestMethod = '', ?string $name = null): void
+    public function map(string $routePattern, $callable, ?string $requestMethod = '', ?string $name = null): void
     {
         // Проверка на добавление только разрешенные методы запросов
         if (!$this->request->isValidRequestMethod()) {
