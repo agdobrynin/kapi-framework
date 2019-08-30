@@ -25,8 +25,8 @@ class CsrfGuard
         $this->ttl = 1800;
 
         if (null !== $config) {
-            if ($tokeKey = $config->getCsrfKey()) {
-                $this->tokenKey = $tokeKey;
+            if ($tokenKey = $config->getCsrfKey()) {
+                $this->tokenKey = $tokenKey;
             }
             if ($strength = $config->getCsrfLength()) {
                 $this->strength = $strength;
