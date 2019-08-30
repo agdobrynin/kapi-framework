@@ -9,7 +9,7 @@ final class Router
     /** @var array */
     private $routes;
     private static $currentRouteName;
-    /** @var array */
+    /** @var array Глобальные милдвары */
     private $middleware;
     /** @var string */
     private $defaultActionSymbol = '@';
@@ -25,6 +25,8 @@ final class Router
     private const ROUTE_METHOD = 'ROUTE_METHOD';
     private const ROUTE_ACTION = 'ROUTE_ACTION';
     private const ROUTE_NAME = 'ROUTE_NAME';
+    private const ROUTE_PATTERN = 'ROUTE_PATTERN';
+    private const ROUTE_MIDDLEWARE = 'ROUTE_MIDDLEWARE';
 
     public function __construct(Request $request, Response $response, ?Container $container = null)
     {
@@ -91,17 +93,20 @@ final class Router
     /**
      * Добмавить мидлвару к роуту или глобальную.
      */
-    public function middleware($callable, ?string $route = null): self
+    public function middleware($callable): self
     {
+        $calledClass = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['class'] ?? '';
+        $isGlobalMiddleware = App::class === $calledClass;
         // глобавльная мидлвара
-        if ('' === $route) {
+        if ($isGlobalMiddleware) {
             $lastRoute = '';
-            $next = static function () {
-            };
+            $next = static function () {};
         } else {
-            $lastRoute = key(array_slice($this->routes, -1, 1, true));
+            end($this->routes);
+            $lastRoute = key($this->routes);
             $next = $this->routes[$lastRoute][self::ROUTE_ACTION];
         }
+
         if (is_string($callable)) {
             if (!class_exists($callable)) {
                 throw new RouterException(sprintf('Middleware `%s` not defined', $callable));
@@ -113,7 +118,12 @@ final class Router
             throw new RouterException(sprintf('Middleware `%s` is not callable', $callable));
         }
 
-        $this->middleware[$lastRoute][] = $callable;
+        if ($isGlobalMiddleware) {
+            $this->middleware[] = $callable;
+        } else {
+            $this->routes[$lastRoute][self::ROUTE_MIDDLEWARE][] = $callable;
+        }
+        reset($this->routes);
 
         return $this;
     }
@@ -124,22 +134,24 @@ final class Router
     public function name(string $name): self
     {
         if (!empty($name)) {
-            $lastRoute = key(array_slice($this->routes, -1, 1, true));
+            end($this->routes);
+            $lastRoute = key($this->routes);
             $this->routes[$lastRoute][self::ROUTE_NAME] = $name;
+            reset($this->routes);
         }
 
         return $this;
     }
 
     /**
-     * @param string      $route         может быть роут с регулярными выражениями
+     * @param string      $routePattern  может быть роут с регулярными выражениями
      * @param mixed       $callable      дейтвие
      * @param string      $requestMethod request method
      * @param string|null $name          имя роута
      *
      * @throws RouterException
      */
-    public function add(string $route, $callable, ?string $requestMethod = '', ?string $name = null): void
+    public function add(string $routePattern, $callable, ?string $requestMethod = '', ?string $name = null): void
     {
         // Проверка на добавление только разрешенные методы запросов
         if (!$this->request->isValidRequestMethod()) {
@@ -173,20 +185,19 @@ final class Router
         if (!is_callable($callableResult)) {
             throw new RouterException(sprintf('Controller `%s` is not callable', $callable));
         }
-        $this->routes[$route] = [
+        $this->routes[] = [
+            self::ROUTE_PATTERN => $routePattern,
             self::ROUTE_METHOD => $requestMethod,
             self::ROUTE_ACTION => $callableResult,
             self::ROUTE_NAME => $name,
         ];
     }
 
-    private function resolveMiddlewareGlobal(string $route): ?bool
+    private function resolveMiddlewareGlobal(callable $routeAction): ?bool
     {
-        $globalMiddleware = $this->middleware[''] ?? [];
-        foreach ($globalMiddleware as $middleware) {
+        foreach ($this->middleware as $middleware) {
             if (is_callable($middleware)) {
-                $next = $this->routes[$route][self::ROUTE_ACTION];
-                $callable = new $middleware($this->request, $this->response, $this->container, $next);
+                $callable = new $middleware($this->request, $this->response, $this->container, $routeAction);
                 if ($res = $callable()) {
                     return true;
                 }
@@ -196,14 +207,11 @@ final class Router
         return null;
     }
 
-    private function resolveMiddleware(string $route): ?bool
+    private function resolveMiddleware(?array $arrayCallable): ?bool
     {
-        if ($middleware = $this->middleware[$route] ?? null) {
-            self::$currentRouteName = $this->routes[$route][self::ROUTE_NAME];
-            if (is_callable($middleware[0])) {
-                if ($res = call_user_func($middleware[0])) {
-                    return true;
-                }
+        foreach ($arrayCallable as $middleware) {
+            if ($res = $middleware()) {
+                return true;
             }
         }
 
@@ -217,11 +225,21 @@ final class Router
     {
         // настройка конечный слеш в uri опцилнально
         $trailingSlash = $this->config->getTrailingSlash() ? '/?' : '';
-        foreach ($this->routes as $route => $action) {
-            if (1 === preg_match('@^'.$route.$trailingSlash.'$@D', $this->request->uri(), $matches)) {
-                $isValidRout = empty($action[self::ROUTE_METHOD]) || $this->request->getRequestMethod() === $action[self::ROUTE_METHOD];
+        foreach ($this->routes as $route) {
+            /** @var string $routePattern */
+            $routePattern = $route[self::ROUTE_PATTERN];
+            /** @var string $routeMethod */
+            $routeMethod = $route[self::ROUTE_METHOD];
+            /** @var string $routeName */
+            $routeName = $route[self::ROUTE_NAME];
+            /** @var callable $routeAction */
+            $routeAction = $route[self::ROUTE_ACTION];
+            /** @var array $routeMiddleware */
+            $routeMiddleware = $route[self::ROUTE_MIDDLEWARE] ?? [];
+            if (1 === preg_match('@^'.$routePattern.$trailingSlash.'$@D', $this->request->uri(), $matches)) {
+                $isValidRout = empty($routeMethod) || $this->request->getRequestMethod() === $routeMethod;
                 if ($isValidRout) {
-                    self::$currentRouteName = $action[self::ROUTE_NAME];
+                    self::$currentRouteName = $routeName;
                     $params = array_intersect_key(
                         $matches,
                         array_flip(array_filter(array_keys($matches), 'is_string'))
@@ -229,15 +247,15 @@ final class Router
                     // Установим в Request параметры полученные от роута через regExp переменные
                     $this->request->setAttributes($params);
                     // Глобальные мидлвары
-                    if ($res = $this->resolveMiddlewareGlobal($route)) {
+                    if ($res = $this->resolveMiddlewareGlobal($routeAction)) {
                         return;
                     }
                     // Мидлвары привязанные к роуту
-                    if ($res = $this->resolveMiddleware($route)) {
+                    if ($res = $this->resolveMiddleware($routeMiddleware)) {
                         return;
                     }
                     // Для вызова маршрута с колбэк функциями, удобно для коротких контроллеров rest api
-                    call_user_func_array($action[self::ROUTE_ACTION], $params);
+                    call_user_func_array($routeAction, $params);
 
                     return;
                 }
