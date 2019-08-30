@@ -100,7 +100,7 @@ class App
 
     public function middleware($callable): Router
     {
-        return $this->router->middleware($callable, '');
+        return $this->router->middleware($callable);
     }
 
     public function exceptionTemplate(string $responsePhrase, string $message): string
