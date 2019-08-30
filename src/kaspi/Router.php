@@ -2,7 +2,6 @@
 
 namespace Kaspi;
 
-use Kaspi\Exception\AppException;
 use Kaspi\Exception\RouterException;
 
 final class Router
@@ -104,8 +103,16 @@ final class Router
             $next = $this->routes[$lastRoute][self::ROUTE_ACTION];
         }
         if (is_string($callable)) {
+            if (!class_exists($callable)) {
+                throw new RouterException(sprintf('Middleware `%s` not defined', $callable));
+            }
             $callable = new $callable($this->request, $this->response, $this->container, $next);
         }
+
+        if (!is_callable($callable)) {
+            throw new RouterException(sprintf('Middleware `%s` is not callable', $callable));
+        }
+
         $this->middleware[$lastRoute][] = $callable;
 
         return $this;
@@ -130,7 +137,7 @@ final class Router
      * @param string      $requestMethod request method
      * @param string|null $name          имя роута
      *
-     * @throws AppException|RouterException
+     * @throws RouterException
      */
     public function add(string $route, $callable, ?string $requestMethod = '', ?string $name = null): void
     {
@@ -146,18 +153,29 @@ final class Router
             if (false !== strpos($callable, $this->defaultActionSymbol)) {
                 $controller = strstr($callable, $this->defaultActionSymbol, true);
                 $method = substr(strrchr($callable, $this->defaultActionSymbol), 1);
-                $callable = [new $controller($this->request, $this->response, $this->container), $method];
+                if (!class_exists($controller)) {
+                    throw new RouterException(sprintf('Сontroller `%s` not defined', $controller));
+                }
+                if (!method_exists($controller, $method)) {
+                    throw new RouterException(sprintf('Method `%s` at controller `%s` not defined', $method, $controller));
+                }
+                $callableResult = [new $controller($this->request, $this->response, $this->container), $method];
             } else {
-                $callable = new $callable($this->request, $this->response, $this->container);
+                if (!class_exists($callable)) {
+                    throw new RouterException(sprintf('Controller `%s` not defined', $callable));
+                }
+                $callableResult = new $callable($this->request, $this->response, $this->container);
             }
+        } else {
+            $callableResult = $callable;
         }
 
-        if (!is_callable($callable)) {
-            throw new AppException('Action is not callable');
+        if (!is_callable($callableResult)) {
+            throw new RouterException(sprintf('Controller `%s` is not callable', $callable));
         }
         $this->routes[$route] = [
             self::ROUTE_METHOD => $requestMethod,
-            self::ROUTE_ACTION => $callable,
+            self::ROUTE_ACTION => $callableResult,
             self::ROUTE_NAME => $name,
         ];
     }
@@ -192,6 +210,9 @@ final class Router
         return null;
     }
 
+    /**
+     * @throws RouterException
+     */
     public function resolve(): void
     {
         // настройка конечный слеш в uri опцилнально
