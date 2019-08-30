@@ -73,6 +73,7 @@ class CsrfGuard
 
     private function isValidToken(?string $token): void
     {
+        // TODO проверять наличие SESSION или еще лучше перейти на класс декоратор типа SessionStorage
         if ($_SESSION[$this->tokenKey]['ttl'] < time()) {
             throw new CsrfGuardException('Csrf token key is expired');
         }
