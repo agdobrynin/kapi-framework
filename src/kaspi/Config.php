@@ -62,17 +62,17 @@ class Config
 
     public function getCsrfTtl(): ?int
     {
-        return $this->config['csrf']['ttl'] ?: null;
+        return $this->config['csrf']['ttl'] ?? null;
     }
 
     public function getCsrfName(): ?string
     {
-        return $this->config['csrf']['name'] ?: null;
+        return $this->config['csrf']['name'] ?? null;
     }
 
     public function getCsrfLength(): ?int
     {
-        return $this->config['csrf']['length'] ?: null;
+        return $this->config['csrf']['length'] ?? null;
     }
 
     public function getTrailingSlash(): bool
