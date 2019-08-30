@@ -1,4 +1,5 @@
 <?php
+
 use Kaspi\FlashMessages;
 use Kaspi\Router;
 
@@ -24,13 +25,15 @@ if (false === function_exists('flashWarning')) {
 }
 
 if (false === function_exists('getCurrentRoute')) {
-    function getCurrentRoute(): ?string {
+    function getCurrentRoute(): ?string
+    {
         return Router::getCurrentRouteName();
     }
 }
 
 if (false === function_exists('isRoute')) {
-    function isRoute(string $route): bool {
+    function isRoute(string $route): bool
+    {
         return $route === getCurrentRoute();
     }
 }

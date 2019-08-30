@@ -23,9 +23,9 @@ final class Router
     /** @var Config */
     private $config;
 
-    protected const ROUTE_METHOD = 'ROUTE_METHOD';
-    protected const ROUTE_ACTION = 'ROUTE_ACTION';
-    protected const ROUTE_NAME = 'ROUTE_NAME';
+    private const ROUTE_METHOD = 'ROUTE_METHOD';
+    private const ROUTE_ACTION = 'ROUTE_ACTION';
+    private const ROUTE_NAME = 'ROUTE_NAME';
 
     public function __construct(Request $request, Response $response, ?Container $container = null)
     {
@@ -120,14 +120,15 @@ final class Router
             $lastRoute = key(array_slice($this->routes, -1, 1, true));
             $this->routes[$lastRoute][self::ROUTE_NAME] = $name;
         }
+
         return $this;
     }
 
     /**
-     * @param string $route         может быть роут с регулярными выражениями
-     * @param mixed $callable       дейтвие
-     * @param string $requestMethod request method
-     * @param string|null $name     имя роута
+     * @param string      $route         может быть роут с регулярными выражениями
+     * @param mixed       $callable      дейтвие
+     * @param string      $requestMethod request method
+     * @param string|null $name          имя роута
      *
      * @throws AppException|RouterException
      */
@@ -196,7 +197,7 @@ final class Router
         // настройка конечный слеш в uri опцилнально
         $trailingSlash = $this->config->getTrailingSlash() ? '/?' : '';
         foreach ($this->routes as $route => $action) {
-            if (1 === preg_match('@^' . $route . $trailingSlash . '$@D', $this->request->uri(), $matches)) {
+            if (1 === preg_match('@^'.$route.$trailingSlash.'$@D', $this->request->uri(), $matches)) {
                 $isValidRout = empty($action[self::ROUTE_METHOD]) || $this->request->getRequestMethod() === $action[self::ROUTE_METHOD];
                 if ($isValidRout) {
                     self::$currentRouteName = $action[self::ROUTE_NAME];

@@ -43,11 +43,13 @@ class Request
         // GET или POST из глобальных переменных PHP
         if ($this->isPost()) {
             $this->request = $_POST;
+
             return;
         }
 
         if ($this->isGet()) {
             $this->request = $_GET;
+
             return;
         }
 
@@ -56,6 +58,7 @@ class Request
             $this->request = [];
             $inputSource = file_get_contents('php://input');
             parse_str($inputSource, $this->request);
+
             return;
         }
     }
@@ -101,14 +104,15 @@ class Request
     public function getEnv(string $key): ?string
     {
         // SERVER переменные
-        if (null === $this->server){
+        if (null === $this->server) {
             $this->server = $_SERVER;
         }
+
         return $this->server[$key] ?? null;
     }
 
     /**
-     * Полученные с клиента Cookie
+     * Полученные с клиента Cookie.
      */
     public function getCookie(string $key): ?string
     {
@@ -116,6 +120,7 @@ class Request
         if (null === $this->cookie) {
             $this->cookie = $_COOKIE;
         }
+
         return $this->cookie[$key] ?? null;
     }
 
@@ -124,6 +129,7 @@ class Request
         if (null === $this->request) {
             $this->getRequestInput();
         }
+
         return $this->request[$key] ?? null;
     }
 
@@ -169,6 +175,7 @@ class Request
         if (null === $this->headers) {
             $this->headers = getallheaders() ?: [];
         }
+
         return $this->headers[$header] ?? null;
     }
 

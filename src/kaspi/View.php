@@ -17,7 +17,7 @@ class View
     public function __construct(Config $config)
     {
         try {
-            $this->viewPath = realpath($config->getViewPath()) . '/';
+            $this->viewPath = realpath($config->getViewPath()).'/';
         } catch (ConfigException $exception) {
             throw new ViewException($exception->getMessage());
         }
@@ -33,14 +33,14 @@ class View
     {
         $data = array_merge($data, $this->globalData);
         extract($data, EXTR_OVERWRITE);
-        include $this->viewPath . $fileName;
+        include $this->viewPath.$fileName;
     }
 
     /**
-     * Расширение существующего шаблона из текущего
+     * Расширение существующего шаблона из текущего.
      *
      * @param string $layout путь к расширяемому шаблону
-     * @param array $data    переменные передаваемые в шаблон
+     * @param array  $data   переменные передаваемые в шаблон
      */
     private function layout(string $layout, array $data = []): void
     {
@@ -49,7 +49,7 @@ class View
     }
 
     /**
-     * Объявление секции которую можно использовать по имени в расширяеомо шаблоне
+     * Объявление секции которую можно использовать по имени в расширяеомо шаблоне.
      *
      * @param string $sectionName Имя секции отличное от дефолтной
      */
@@ -74,13 +74,11 @@ class View
         echo $this->sections[$sectionName];
     }
 
-
     public function render(string $template, array $data = []): string
     {
-
-        $template = $this->viewPath . $template . ($this->useExtension ? '' : '.php');
+        $template = $this->viewPath.$template.($this->useExtension ? '' : '.php');
         if (file_exists($template)) {
-            $this->layout = new \StdClass;
+            $this->layout = new \StdClass();
             $data = array_merge($data, $this->globalData);
             extract($data, EXTR_OVERWRITE);
             ob_start();
@@ -91,8 +89,9 @@ class View
             }
             $content = $this->sections[self::DEFAULT_SECTION];
             ob_end_clean();
+
             return $content;
         }
-        throw new ViewException('View does not exist: ' . $template);
+        throw new ViewException('View does not exist: '.$template);
     }
 }

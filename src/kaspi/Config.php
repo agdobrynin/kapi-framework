@@ -46,6 +46,7 @@ class Config
         if (!is_dir($path)) {
             throw new ConfigException(sprintf('Directory `%s` for templates not found', $path));
         }
+
         return $path;
     }
 
