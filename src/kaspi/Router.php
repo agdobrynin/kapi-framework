@@ -131,7 +131,7 @@ final class Router
     /**
      * Добавить имя роуту.
      */
-    public function name(string $name): self
+    public function setName(string $name): self
     {
         if (!empty($name)) {
             end($this->routes);
