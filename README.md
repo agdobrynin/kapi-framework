@@ -17,4 +17,4 @@ composer require kaspi/kapi-framework:dev-master
 Для приведения кода к стандартам используем php-cs-fixer который объявлен 
 в dev зависимости composer-а
 
-``composer php-cs-fixer`` 
+``composer fixer`` 
