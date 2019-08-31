@@ -16,10 +16,10 @@ class Container
 
     public function __get(string $name)
     {
-        $this->get($name);
+        return $this->get($name);
     }
 
-    public function __set(string $name, $container)
+    public function __set(string $name, $container): void
     {
         $this->set($name, $this->container);
     }
