@@ -74,7 +74,7 @@ class View
         return null;
     }
 
-    public function pathFor(string $routeName, ?array $args): ?string
+    public function pathFor(string $routeName, ?array $args = null): ?string
     {
         /** @var Router $router */
         try {
