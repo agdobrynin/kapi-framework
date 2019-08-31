@@ -139,7 +139,7 @@ final class Router
         return $this;
     }
 
-    public function getRoutePatternByName(string $routeName, ?array $args): ?string
+    public function getRoutePatternByName(string $routeName, ?array $args = null): ?string
     {
         $key = array_search($routeName, array_column($this->routes, self::ROUTE_NAME), true);
         if ($key !== false) {
