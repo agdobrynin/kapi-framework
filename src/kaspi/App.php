@@ -125,14 +125,20 @@ class App
         return $this->router->middleware($callable);
     }
 
-    public function exceptionTemplate(string $responsePhrase, string $message): string
+    public function exceptionTemplate(string $responsePhrase, string $message, string $traceAsString): string
     {
+        if (!self::getConfig()->displayErrorDetails()) {
+            $traceAsString = '';
+        } else {
+            $traceAsString = '<pre>' . $traceAsString . '</pre>';
+        }
         return <<< EOF
                 <html><head>
                 <title>{$responsePhrase}</title>
                 </head><body>
                 <h1>{$responsePhrase}</h1>
                 <p>{$message}</p>
+                {$traceAsString}
                 </body></html>
 EOF;
     }
@@ -146,17 +152,20 @@ EOF;
             // @TODO подумать о дефолтном шаблоне
             $exceptionCode = $exception->getCode() ?: ResponseCode::BAD_REQUEST;
             $exceptionMessage = $exception->getMessage();
+            $traceAsString = $exception->getTraceAsString();
         } catch (AppException | ContainerException $exception) {
             // @TODO подумать о дефолтном шаблоне
             $exceptionCode = $exception->getCode() ?: ResponseCode::INTERNAL_SERVER_ERROR;
             $exceptionMessage = $exception->getMessage();
+            $traceAsString = $exception->getTraceAsString();
         } catch (\Exception $exception) {
             $exceptionCode = $exception->getCode() ?: ResponseCode::INTERNAL_SERVER_ERROR;
             $exceptionMessage = $exception->getMessage();
+            $traceAsString = $exception->getTraceAsString();
         }
         if (isset($exceptionCode)) {
             $this->response->errorHeader($exceptionCode);
-            $body = $this->exceptionTemplate(ResponseCode::PHRASES[$exceptionCode], $exceptionMessage);
+            $body = $this->exceptionTemplate(ResponseCode::PHRASES[$exceptionCode], $exceptionMessage, $traceAsString);
             $this->response->setBody($body);
         }
         $requestTimeFloat = (float)str_replace(',', '.', $this->request->getEnv('REQUEST_TIME_FLOAT'));

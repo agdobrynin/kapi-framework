@@ -13,6 +13,11 @@ class Config
         $this->config = $arrConfig;
     }
 
+    public function displayErrorDetails(): bool
+    {
+        return $this->config['displayErrorDetails'] ?? false;
+    }
+
     public function getDbDsnConfig(): string
     {
         if (empty($this->config['db']['dsn'])) {
