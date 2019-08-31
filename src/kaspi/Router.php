@@ -206,7 +206,7 @@ final class Router
         foreach ($this->middleware as $middleware) {
             if (is_callable($middleware)) {
                 $callable = new $middleware($this->request, $this->response, $this->container, $routeAction);
-                if ($res = $callable()) {
+                if (null !== $callable()) {
                     return true;
                 }
             }
@@ -218,7 +218,7 @@ final class Router
     private function resolveMiddleware(?array $arrayCallable): ?bool
     {
         foreach ($arrayCallable as $middleware) {
-            if ($res = $middleware()) {
+            if (null !== $middleware()) {
                 return true;
             }
         }
@@ -255,11 +255,11 @@ final class Router
                     // Установим в Request параметры полученные от роута через regExp переменные
                     $this->request->setAttributes($params);
                     // Глобальные мидлвары
-                    if ($res = $this->resolveMiddlewareGlobal($routeAction)) {
+                    if (null !== $this->resolveMiddlewareGlobal($routeAction)) {
                         return;
                     }
                     // Мидлвары привязанные к роуту
-                    if ($res = $this->resolveMiddleware($routeMiddleware)) {
+                    if (null !== $this->resolveMiddleware($routeMiddleware)) {
                         return;
                     }
                     // Для вызова маршрута с колбэк функциями, удобно для коротких контроллеров rest api
