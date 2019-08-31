@@ -27,6 +27,9 @@ class View
             throw new ViewException($exception->getMessage());
         }
         $this->useExtension = $config->getViewUseTemplateExtension();
+        if (null === $container) {
+            $container = new Container();
+        }
         $this->container = $container;
     }
 
