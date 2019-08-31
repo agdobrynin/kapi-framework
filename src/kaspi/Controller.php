@@ -18,7 +18,7 @@ class Controller
         $this->container = $container;
     }
 
-    public function pathFor(string $routeName, ?array $args): ?string
+    public function pathFor(string $routeName, ?array $args = null): ?string
     {
         /** @var Router $router */
         $router = $this->container->{Router::class};
