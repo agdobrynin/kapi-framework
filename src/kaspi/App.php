@@ -24,10 +24,18 @@ class App
     /** @var Container|null */
     protected $container;
 
-    public function __construct(Config $config, Request $request, Response $response, ?Container $container = null)
+    public function __construct(Config $config, ?Request $request = null, ?Response $response = null, ?Container $container = null)
     {
         self::$config = $config;
+
+        if (null === $request) {
+            $request = new Request();
+        }
         $this->request = $request;
+
+        if (null === $response) {
+            $response = new Response();
+        }
         $this->response = $response;
 
         if (null === $container) {
