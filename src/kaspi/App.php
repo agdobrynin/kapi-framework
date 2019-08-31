@@ -13,24 +13,38 @@ class App
 {
     public const APP_PROD = 'PROD';
     public const APP_DEV = 'DEV';
-    /** @var Request */
-    private $request;
-    /** @var Response */
-    private $response;
+    /** @var Request входящий http запрос */
+    public $request;
+    /** @var Response ответ http */
+    public $response;
     /** @var Config */
     private static $config;
     /** @var Router */
     private $router;
     /** @var Container|null */
-    private $container;
+    protected $container;
 
     public function __construct(Config $config, Request $request, Response $response, ?Container $container = null)
     {
         self::$config = $config;
         $this->request = $request;
         $this->response = $response;
-        $this->router = new Router($request, $response, $container);
-        $this->container = $container;
+
+        if (null === $container) {
+            $this->container = new Container();
+        } else {
+            $this->container = $container;
+        }
+        // Router помещаем в контейнер чтобы можно было использовать его например в контроллерах и милварах
+        $container = $this->container;
+        try {
+            $this->container->set(Router::class, static function () use ($request, $response, $container): Router {
+                return new Router($request, $response, $container);
+            });
+            $this->router = $this->container->get(Router::class);
+        } catch (ContainerException $exception) {
+            throw new AppException($exception->getMessage(), $exception->getCode(), $exception);
+        }
     }
 
     public function getContainer(): Container
@@ -133,7 +147,7 @@ EOF;
             $body = $this->exceptionTemplate(ResponseCode::PHRASES[$exceptionCode], $exceptionMessage);
             $this->response->setBody($body);
         }
-        $requestTimeFloat = (float) str_replace(',', '.', $this->request->getEnv('REQUEST_TIME_FLOAT'));
+        $requestTimeFloat = (float)str_replace(',', '.', $this->request->getEnv('REQUEST_TIME_FLOAT'));
         if ($time = (microtime(true) - $requestTimeFloat)) {
             $this->response->setHeader('X-Generation-time', $time);
         }
