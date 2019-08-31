@@ -276,7 +276,10 @@ final class Router
             );
         }
         throw new NotFound(
-            sprintf('Route %s not resolved', $this->request->uri()),
+            sprintf(
+                'The requested resource %s could not be found. Please verify the URI and try again',
+                $this->request->uri()
+            ),
             ResponseCode::NOT_FOUND
         );
     }
