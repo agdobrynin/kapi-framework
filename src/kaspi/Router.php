@@ -95,7 +95,8 @@ final class Router
         // глобавльная мидлвара
         if ($isGlobalMiddleware) {
             $lastRoute = '';
-            $next = static function () {};
+            $next = static function () {
+            };
         } else {
             end($this->routes);
             $lastRoute = key($this->routes);
@@ -138,11 +139,20 @@ final class Router
         return $this;
     }
 
+    public function getRoutePatternByName(string $routeName): ?string
+    {
+        $key = array_search($routeName, array_column($this->routes, self::ROUTE_NAME), true);
+        if ($key !== false) {
+            return $this->routes[$key][self::ROUTE_PATTERN];
+        }
+        return null;
+    }
+
     /**
-     * @param string      $routePattern  может быть роут с регулярными выражениями
-     * @param mixed       $callable      дейтвие
-     * @param string      $requestMethod request method
-     * @param string|null $name          имя роута
+     * @param string $routePattern  может быть роут с регулярными выражениями
+     * @param mixed $callable       дейтвие
+     * @param string $requestMethod request method
+     * @param string|null $name     имя роута
      *
      * @throws RouterException
      */
@@ -231,7 +241,7 @@ final class Router
             $routeAction = $route[self::ROUTE_ACTION];
             /** @var array $routeMiddleware */
             $routeMiddleware = $route[self::ROUTE_MIDDLEWARE] ?? [];
-            if (1 === preg_match('@^'.$routePattern.$trailingSlash.'$@D', $this->request->uri(), $matches)) {
+            if (1 === preg_match('@^' . $routePattern . $trailingSlash . '$@D', $this->request->uri(), $matches)) {
                 $isValidRout = empty($routeMethod) || $this->request->getRequestMethod() === $routeMethod;
                 if ($isValidRout) {
                     self::$currentRouteName = $routeName;
