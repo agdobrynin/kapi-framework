@@ -4,10 +4,10 @@ namespace Kaspi;
 
 class Middleware
 {
-    private $request;
-    private $response;
-    private $container;
-    private $next;
+    protected $request;
+    protected $response;
+    protected $container;
+    protected $next;
 
     public function __construct(Request $request, Response $response, Container $container, callable $next)
     {
@@ -15,25 +15,5 @@ class Middleware
         $this->response = $response;
         $this->container = $container;
         $this->next = $next;
-    }
-
-    public function getRequest(): Request
-    {
-        return $this->request;
-    }
-
-    public function getResponse(): Response
-    {
-        return $this->response;
-    }
-
-    public function getContainer(): ?Container
-    {
-        return $this->container;
-    }
-
-    public function getNext(): callable
-    {
-        return $this->next;
     }
 }
