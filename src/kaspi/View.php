@@ -3,6 +3,7 @@
 namespace Kaspi;
 
 use Kaspi\Exception\ConfigException;
+use Kaspi\Exception\ContainerException;
 use Kaspi\Exception\ViewException;
 
 class View
@@ -24,6 +25,17 @@ class View
         }
         $this->useExtension = $config->getViewUseTemplateExtension();
         $this->container = $container;
+    }
+
+    public function pathFor(string $routeName, ?array $args): ?string
+    {
+        /** @var Router $router */
+        try {
+            $router = $this->container->{Router::class};
+            return $router->getRoutePatternByName($routeName, $args);
+        } catch (ContainerException $exception) {
+            throw new ViewException($exception->getMessage(), $exception->getCode(), $exception);
+        }
     }
 
     public function addGlobalData(string $key, $data): void
