@@ -139,10 +139,11 @@ final class Router
         return $this;
     }
 
-    public function getRoutePatternByName(string $routeName): ?string
+    public function getRoutePatternByName(string $routeName, ?array $args): ?string
     {
         $key = array_search($routeName, array_column($this->routes, self::ROUTE_NAME), true);
         if ($key !== false) {
+            // TODO так как возвращается pattern роутера, то там могут быть regex выражения, подуймай как их менять!
             return $this->routes[$key][self::ROUTE_PATTERN];
         }
         return null;
