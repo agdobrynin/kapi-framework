@@ -14,13 +14,13 @@ final class Router
     /** @var string */
     private $defaultActionSymbol = '@';
     /** @var Request */
-    private $request;
+    protected $request;
     /** @var Response */
-    private $response;
+    protected $response;
     /** @var Container|null */
-    private $container;
+    protected $container;
     /** @var Config */
-    private $config;
+    protected $config;
 
     private const ROUTE_METHOD = 'ROUTE_METHOD';
     private const ROUTE_ACTION = 'ROUTE_ACTION';
@@ -41,11 +41,6 @@ final class Router
     public static function getCurrentRouteName(): ?string
     {
         return self::$currentRouteName;
-    }
-
-    public function getContainer(): ?Container
-    {
-        return $this->container;
     }
 
     public function get(string $routePattern, $callable): self
