@@ -24,6 +24,11 @@ class Container
         $this->set($name, $this->container);
     }
 
+    public function __isset(string $name): bool
+    {
+        return $this->has($name);
+    }
+
     public function set(string $name, $container): void
     {
         if ($this->has($name)) {
