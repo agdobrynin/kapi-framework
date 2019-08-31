@@ -31,10 +31,10 @@ class App
         $this->response = $response;
 
         if (null === $container) {
-            $this->container = new Container();
-        } else {
-            $this->container = $container;
+            $container = new Container();
         }
+        $this->container = $container;
+        
         // Router помещаем в контейнер чтобы можно было использовать его например в контроллерах и милварах
         $container = $this->container;
         try {
