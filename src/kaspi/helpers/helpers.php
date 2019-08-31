@@ -24,16 +24,18 @@ if (false === function_exists('flashWarning')) {
     }
 }
 
-if (false === function_exists('getCurrentRoute')) {
-    function getCurrentRoute(): ?string
+if (false === function_exists('getCurrentRouteName')) {
+    // возвращает выолняемое имя роута (если он именован)
+    function getCurrentRouteName(): ?string
     {
         return Router::getCurrentRouteName();
     }
 }
 
-if (false === function_exists('isRoute')) {
-    function isRoute(string $route): bool
+if (false === function_exists('isRouteName')) {
+    // проверяет имя роута с выполняемым именем роута (если он именован)
+    function isRouteName(string $routeName): bool
     {
-        return $route === getCurrentRoute();
+        return $routeName === getCurrentRouteName();
     }
 }
