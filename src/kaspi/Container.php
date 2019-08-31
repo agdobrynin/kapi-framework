@@ -14,6 +14,16 @@ class Container
         $this->container = [];
     }
 
+    public function __get(string $name)
+    {
+        $this->get($name);
+    }
+
+    public function __set(string $name, $container)
+    {
+        $this->set($name, $this->container);
+    }
+
     public function set(string $name, $container): void
     {
         if ($this->has($name)) {
