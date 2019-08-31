@@ -163,7 +163,7 @@ final class Router
     {
         // Проверка на добавление только разрешенные методы запросов
         if (!$this->request->isValidRequestMethod()) {
-            throw new RouterException(
+            throw new MethodNotAllowed(
                 sprintf('Request method `%s` is not support', $requestMethod),
                 ResponseCode::METHOD_NOT_ALLOWED
             );
