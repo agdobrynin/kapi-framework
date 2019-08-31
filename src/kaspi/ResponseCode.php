@@ -6,6 +6,7 @@ class ResponseCode
 {
     public const OK = 200;
     public const MOVED_PERMANENTLY = 301;
+    public const MOVED_TEMPORARILY = 302;
     public const BAD_REQUEST = 400;
     public const UNAUTHORIZED = 401;
     public const FORBIDDEN = 403;
@@ -16,6 +17,7 @@ class ResponseCode
     public const PHRASES = [
         self::OK => 'OK',
         self::MOVED_PERMANENTLY => 'Moved Permanently',
+        self::MOVED_TEMPORARILY => 'Moved Temporarily',
         self::BAD_REQUEST => 'Bad Request',
         self::UNAUTHORIZED => 'Unauthorized',
         self::FORBIDDEN => 'Forbidden',
