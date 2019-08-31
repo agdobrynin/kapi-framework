@@ -2,6 +2,8 @@
 
 namespace Kaspi;
 
+use Kaspi\Exception\Router\MethodNotAllowed;
+use Kaspi\Exception\Router\NotFound;
 use Kaspi\Exception\RouterException;
 
 final class Router
@@ -268,12 +270,12 @@ final class Router
             }
         }
         if (isset($isValidRout)) {
-            throw new RouterException(
+            throw new MethodNotAllowed(
                 sprintf('Method not allowed at route %s', $this->request->uri()),
                 ResponseCode::METHOD_NOT_ALLOWED
             );
         }
-        throw new RouterException(
+        throw new NotFound(
             sprintf('Route %s not resolved', $this->request->uri()),
             ResponseCode::NOT_FOUND
         );

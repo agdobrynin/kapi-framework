@@ -141,6 +141,9 @@ EOF;
             // @TODO подумать о дефолтном шаблоне
             $exceptionCode = $exception->getCode() ?: ResponseCode::INTERNAL_SERVER_ERROR;
             $exceptionMessage = $exception->getMessage();
+        } catch (\Exception $exception) {
+            $exceptionCode = $exception->getCode() ?: ResponseCode::INTERNAL_SERVER_ERROR;
+            $exceptionMessage = $exception->getMessage();
         }
         if (isset($exceptionCode)) {
             $this->response->errorHeader($exceptionCode);
