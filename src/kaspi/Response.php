@@ -56,10 +56,11 @@ class Response
         return $this->body;
     }
 
-    public function setJson($data, int $options = 0, int $depth = 512): void
+    public function setJson($data, int $options = 0, int $depth = 512): self
     {
         $this->setBody(json_encode($data, $options, $depth))
             ->setHeader('Content-Type', 'application/json');
+        return $this;
     }
 
     public function redirect(string $url): void
