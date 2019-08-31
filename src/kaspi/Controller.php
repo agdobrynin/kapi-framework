@@ -18,11 +18,10 @@ class Controller
         $this->container = $container;
     }
 
-    public function pathFor(string $routeName, ... $args): ?string
+    public function pathFor(string $routeName, ?array $args): ?string
     {
         /** @var Router $router */
         $router = $this->container->{Router::class};
-        // TODO так как возвращается pattern роутера, то там могут быть regex выражения, подуймай как их менять!
-        return $router->getRoutePatternByName($routeName);
+        return $router->getRoutePatternByName($routeName, $args);
     }
 }
