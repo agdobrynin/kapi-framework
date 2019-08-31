@@ -14,6 +14,9 @@ class View
     private $sections;
     private $useExtension;
     protected $container;
+    /** @var array of \Closure */
+    protected $extensions = [];
+
     public const DEFAULT_SECTION = 'content';
 
     public function __construct(Config $config, ?Container $container = null)
@@ -25,6 +28,50 @@ class View
         }
         $this->useExtension = $config->getViewUseTemplateExtension();
         $this->container = $container;
+    }
+
+    /**
+     * Позволяет добавить \Closure объект и выолнить с помощью View::getExtension
+     *
+     * $view = new View(...);
+     * $view->addExtension('my-ext', function(?$param) {
+     *      // Closure функция модет быть и без параметров,
+     *      // но если они нужны их надо объявить они понадобятся при вызове
+     *      // здесь код функции
+     * });
+     *
+     * @param string $extName
+     * @param callable $callable
+     *
+     * @return bool
+     */
+    public function addExtension(string $extName, callable $callable): bool
+    {
+        if (empty($this->extensions[$extName])) {
+            $this->extensions[$extName] = $callable;
+            return true;
+        }
+        return null;
+    }
+
+    /**
+     * Позволяет извлечь \Closure объект и выполнять его
+     *
+     * В шаблоне вызвать если нет параметров
+     * $this->getExtension('my-ext')();
+     * если параметры есть
+     * $this->getExtension('my-ext')('param1' [[, 'param2'], ...]);
+     *
+     * @param string $extName
+     *
+     * @return \Closure|null
+     */
+    public function getExtension(string $extName): ?\Closure
+    {
+        if (!empty($this->extensions[$extName])) {
+            return $this->extensions[$extName];
+        }
+        return null;
     }
 
     public function pathFor(string $routeName, ?array $args): ?string
