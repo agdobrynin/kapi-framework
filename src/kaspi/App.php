@@ -131,6 +131,7 @@ EOF;
 
     public function run(): void
     {
+        $exceptionMessage = '';
         try {
             $this->router->resolve();
         } catch (ViewException | RouterException $exception) {
