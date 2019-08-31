@@ -53,7 +53,7 @@ class Response
 
     public function getBody(): ?string
     {
-        return $this->body;
+        return $this->body->getContents();
     }
 
     public function setJson($data, int $options = 0, int $depth = 512): self
@@ -78,6 +78,9 @@ class Response
 
     public function emit(): ?string
     {
+        if ($ContentLength = $this->body->getSize()) {
+            $this->headers->set('Content-Length', $ContentLength);
+        }
         $header = sprintf('HTTP/1.1 %s %s', $this->statusCode, $this->responsePhrase);
         header($header);
         foreach ($this->headers->get() as $name => $value) {
