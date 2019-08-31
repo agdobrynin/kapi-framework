@@ -17,19 +17,20 @@ class Response
         $this->responsePhrase = ResponseCode::PHRASES[$this->statusCode] ?? '';
     }
 
-    public function setResponsePhrase(string $phrase): void
+    public function setResponsePhrase(string $phrase): self
     {
         $this->responsePhrase = $phrase;
+        return $this;
     }
 
-    public function setStatusCode(int $statusCode): Response
+    public function setStatusCode(int $statusCode): self
     {
         $this->statusCode = $statusCode;
 
         return $this;
     }
 
-    public function setHeader(string $header, string $value): Response
+    public function setHeader(string $header, string $value): self
     {
         $clone = clone $this;
         $clone->headers->set($header, $value);
@@ -42,32 +43,32 @@ class Response
         return $this->headers->get()[$header] ?? null;
     }
 
-    public function setBody(string $body = ''): Response
+    public function setBody(string $body = ''): self
     {
-        $this->body->set($body);
+        $clone = clone $this;
+        $this->body->write($body);
 
-        return $this;
+        return $clone;
     }
 
     public function getBody(): ?string
     {
-        return $this->body->get();
+        return $this->body;
     }
 
     public function setJson($data, int $options = 0, int $depth = 512): void
     {
-        $this->setHeader('Content-Type', 'application/json')
-            ->setBody(json_encode($data, $options, $depth));
+        $this->setBody(json_encode($data, $options, $depth))
+            ->setHeader('Content-Type', 'application/json');
     }
 
     public function redirect(string $url): void
     {
-        $this->setHeader('location', $url)
-            ->setStatusCode(ResponseCode::MOVED_PERMANENTLY)
-            ->setResponsePhrase(ResponseCode::PHRASES[ResponseCode::MOVED_PERMANENTLY]);
+        $this->setHeader('location', $url)->setStatusCode(ResponseCode::MOVED_TEMPORARILY)
+            ->setResponsePhrase(ResponseCode::PHRASES[ResponseCode::MOVED_TEMPORARILY]);
     }
 
-    public function errorHeader(int $responseCode): Response
+    public function errorHeader(int $responseCode): self
     {
         $this->setStatusCode($responseCode)->setResponsePhrase(ResponseCode::PHRASES[$responseCode]);
 
@@ -76,11 +77,13 @@ class Response
 
     public function emit(): ?string
     {
-        header('HTTP/1.1 '.$this->statusCode.' '.$this->responsePhrase);
-        foreach ($this->headers->get() as $header => $value) {
-            header($header.': '.$value);
+        $header = sprintf('HTTP/1.1 %s %s', $this->statusCode, $this->responsePhrase);
+        header($header);
+        foreach ($this->headers->get() as $name => $value) {
+            $header = sprintf('%s: %s', $name, $value);
+            header($header);
         }
 
-        return $this->body->get();
+        return $this->body;
     }
 }
