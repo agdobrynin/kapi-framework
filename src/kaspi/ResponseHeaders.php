@@ -6,11 +6,6 @@ class ResponseHeaders
 {
     protected $headers;
 
-    public function __clone()
-    {
-        $this->headers = clone $this->headers;
-    }
-
     public function set(string $header, string $value): void
     {
         $this->headers[$header] = $value;
