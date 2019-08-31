@@ -12,9 +12,10 @@ class View
     private $layout;
     private $sections;
     private $useExtension;
+    protected $container;
     public const DEFAULT_SECTION = 'content';
 
-    public function __construct(Config $config)
+    public function __construct(Config $config, ?Container $container = null)
     {
         try {
             $this->viewPath = realpath($config->getViewPath()).'/';
@@ -22,6 +23,7 @@ class View
             throw new ViewException($exception->getMessage());
         }
         $this->useExtension = $config->getViewUseTemplateExtension();
+        $this->container = $container;
     }
 
     public function addGlobalData(string $key, $data): void
