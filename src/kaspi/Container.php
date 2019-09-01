@@ -38,7 +38,7 @@ class Container
 
     public function get(string $name, ... $arg)
     {
-        if (!$this->has($name)) {
+        if ($this->has($name)) {
             return $this->container[$name](... $arg);
         }
         throw new ContainerException("Container '{$name}' not registered");
