@@ -7,7 +7,6 @@ use Kaspi\Exception\ContainerException;
 class Container
 {
     private $container;
-    private $resolvedContainer;
 
     public function __construct()
     {
@@ -37,14 +36,10 @@ class Container
         $this->container[$name] = $container;
     }
 
-    public function get(string $name)
+    public function get(string $name, ... $arg)
     {
-        if (!empty($this->container[$name])) {
-            if (empty($this->resolvedContainer[$name])) {
-                $this->resolvedContainer[$name] = $this->container[$name]();
-            }
-
-            return $this->resolvedContainer[$name];
+        if (!$this->has($name)) {
+            return $this->container[$name](... $arg);
         }
         throw new ContainerException("Container '{$name}' not registered");
     }
