@@ -17,12 +17,12 @@ class App
     public $request;
     /** @var Response ответ http */
     public $response;
+    /** @var Container|null */
+    public $container;
     /** @var Config */
     private static $config;
     /** @var Router */
     private $router;
-    /** @var Container|null */
-    protected $container;
 
     public function __construct(Config $config, ?Request $request = null, ?Response $response = null, ?Container $container = null)
     {
@@ -53,6 +53,11 @@ class App
         } catch (ContainerException $exception) {
             throw new AppException($exception->getMessage(), $exception->getCode(), $exception);
         }
+    }
+
+    public function __set($name, $value)
+    {
+        throw new AppException('Can not set public property in App');
     }
 
     public function getContainer(): Container
