@@ -6,14 +6,13 @@ class ResponseBody
 {
     protected $size;
     protected $stream;
-
-    public function __construct()
-    {
-        $this->stream = fopen('php://temp', '+rb');
-    }
+    protected $streamFile = 'php://temp';
 
     public function write(string $body): void
     {
+        if (null === $this->stream) {
+            $this->open();
+        }
         if (false === fwrite($this->stream, $body)) {
             throw new \RuntimeException('Could not write to stream');
         }
@@ -57,6 +56,11 @@ class ResponseBody
         if (false === rewind($this->stream)) {
             throw new \RuntimeException('Could not rewind stream');
         }
+    }
+
+    public function open(): void
+    {
+        $this->stream = fopen($this->streamFile, '+rb');
     }
 
     public function close(): void

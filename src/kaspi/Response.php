@@ -62,7 +62,7 @@ class Response
 
     public function resetBody():void
     {
-        $this->body->rewind();
+        $this->body->close();
     }
 
     public function setJson($data, int $options = 0, int $depth = 512): self
