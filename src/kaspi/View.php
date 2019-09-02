@@ -61,25 +61,28 @@ class View
     }
 
     /**
-     * Позволяет извлечь \Closure объект и выполнять его.
+     * Позволяет получить результат экстеншена.
      *
      * В шаблоне вызвать если нет параметров
-     * $this->getExtension('my-ext')();
+     * $this->getExtension('my-ext');
      * если параметры есть
-     * $this->getExtension('my-ext')('param1' [[, 'param2'], ...]);
+     * $this->getExtension('my-ext', 'param1' [[, 'param2'], ...]);
+     *
+     *
+     * @return \Closure|null
      */
-    public function getExtension(string $extName): ?\Closure
+    public function getExtension(string $extName, ...$arg)
     {
         if (!empty($this->extensions[$extName])) {
-            return $this->extensions[$extName];
+            return $this->extensions[$extName](...$arg);
         }
 
-        return null;
+        return;
     }
 
-    public function getExt(string $extName): ?\Closure
+    public function getExt(string $extName, ...$arg)
     {
-        return $this->getExtension($extName);
+        return $this->getExtension($extName)(...$arg);
     }
 
     public function addGlobalData(string $key, $data): void
