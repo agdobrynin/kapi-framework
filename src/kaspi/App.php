@@ -4,8 +4,7 @@ namespace Kaspi;
 
 use Kaspi\Exception\AppException;
 use Kaspi\Exception\ContainerException;
-use Kaspi\Exception\RouterException;
-use Kaspi\Exception\ViewException;
+use Kaspi\Exception\Core;
 use function date_default_timezone_set;
 use function setlocale;
 
@@ -150,33 +149,37 @@ EOF;
 
     public function run(): void
     {
-        $exceptionMessage = '';
         try {
             $this->router->resolve();
-        } catch (ViewException | RouterException $exception) {
-            // @TODO подумать о дефолтном шаблоне
-            $exceptionCode = $exception->getCode() ?: ResponseCode::BAD_REQUEST;
-            $exceptionMessage = $exception->getMessage();
-            $traceAsString = $exception->getTraceAsString();
-        } catch (AppException | ContainerException $exception) {
-            // @TODO подумать о дефолтном шаблоне
-            $exceptionCode = $exception->getCode() ?: ResponseCode::INTERNAL_SERVER_ERROR;
-            $exceptionMessage = $exception->getMessage();
-            $traceAsString = $exception->getTraceAsString();
-        } catch (\Exception $exception) {
-            $exceptionCode = $exception->getCode() ?: ResponseCode::INTERNAL_SERVER_ERROR;
-            $exceptionMessage = $exception->getMessage();
-            $traceAsString = $exception->getTraceAsString();
+        } catch (Core $exception) {
+
+            $this->response->resetHeader();
+            $this->response->resetBody();
+
+            if ($this->container->has('notFoundHandler')) {
+                $this->response->errorHeader(ResponseCode::NOT_FOUND);
+                $this->container->get('notFoundHandler', $exception);
+            }elseif ($this->container->has('notAllowedHandler')) {
+                $this->response->errorHeader(ResponseCode::METHOD_NOT_ALLOWED);
+                $this->container->get('notAllowedHandler', $exception);
+            }elseif ($this->container->has('coreHandler')) {
+                $this->response->errorHeader(ResponseCode::INTERNAL_SERVER_ERROR);
+                $this->container->get('coreHandler', $exception);
+            } else  {
+                $exceptionCode = $exception->getCode()?: ResponseCode::INTERNAL_SERVER_ERROR;
+                $exceptionMessage = $exception->getMessage();
+                $traceAsString = $exception->getTraceAsString();
+
+                $this->response->errorHeader($exceptionCode);
+                $body = $this->exceptionTemplate(ResponseCode::PHRASES[$exceptionCode], $exceptionMessage, $traceAsString);
+                $this->response->setBody($body);
+            }
+        } finally {
+            $requestTimeFloat = (float)str_replace(',', '.', $this->request->getEnv('REQUEST_TIME_FLOAT'));
+            if ($time = (microtime(true) - $requestTimeFloat)) {
+                $this->response->setHeader('X-Generation-time', $time);
+            }
+            echo $this->response->emit();
         }
-        if (isset($exceptionCode)) {
-            $this->response->errorHeader($exceptionCode);
-            $body = $this->exceptionTemplate(ResponseCode::PHRASES[$exceptionCode], $exceptionMessage, $traceAsString);
-            $this->response->setBody($body);
-        }
-        $requestTimeFloat = (float)str_replace(',', '.', $this->request->getEnv('REQUEST_TIME_FLOAT'));
-        if ($time = (microtime(true) - $requestTimeFloat)) {
-            $this->response->setHeader('X-Generation-time', $time);
-        }
-        echo $this->response->emit();
     }
 }
