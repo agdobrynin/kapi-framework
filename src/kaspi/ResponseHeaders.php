@@ -15,4 +15,9 @@ class ResponseHeaders
     {
         return $this->headers ?? [];
     }
+
+    public function reset(): void
+    {
+        $this->headers = [];
+    }
 }

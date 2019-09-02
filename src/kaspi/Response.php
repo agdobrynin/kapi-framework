@@ -43,6 +43,10 @@ class Response
         return $this->headers->get()[$header] ?? null;
     }
 
+    public function resetHeaders():void {
+        $this->headers->reset();
+    }
+
     public function setBody(string $body = ''): self
     {
         $clone = clone $this;
@@ -54,6 +58,11 @@ class Response
     public function getBody(): ?string
     {
         return $this->body->getContents();
+    }
+
+    public function resetBody():void
+    {
+        $this->body->rewind();
     }
 
     public function setJson($data, int $options = 0, int $depth = 512): self
