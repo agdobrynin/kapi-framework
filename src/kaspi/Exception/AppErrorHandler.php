@@ -1,6 +1,6 @@
 <?php
 
-namespace Kaspi;
+namespace Kaspi\Exception;
 /**
  * Имена хэндлеров для обработки Exception-ов
  *
