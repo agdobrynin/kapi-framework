@@ -21,7 +21,7 @@ class ResponseBody
 
     public function __toString(): string
     {
-        if ('stream' !== get_resource_type($this->stream)) {
+        if (null === $this->stream || 'stream' !== get_resource_type($this->stream)) {
             return '';
         }
 
@@ -43,7 +43,7 @@ class ResponseBody
 
     public function getSize(): ?int
     {
-        if (!$this->size) {
+        if (!$this->size && $this->stream) {
             $stats = fstat($this->stream);
             $this->size = $stats['size'] ?? null;
         }
