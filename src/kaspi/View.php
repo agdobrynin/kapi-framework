@@ -7,6 +7,7 @@ use Kaspi\Exception\Core\ViewException;
 
 class View
 {
+    private $config;
     private $viewPath;
     private $globalData = [];
     private $layout;
@@ -19,6 +20,7 @@ class View
 
     public function __construct(Config $config)
     {
+        $this->config = $config;
         try {
             $this->viewPath = realpath($config->getViewPath()) . '/';
         } catch (ConfigException $exception) {
