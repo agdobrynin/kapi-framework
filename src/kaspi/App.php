@@ -155,25 +155,25 @@ EOF;
             $this->response->resetHeaders();
             $this->response->resetBody();
 
-            if ($this->container->has('notFoundHandler') && get_class($exception) === NotFound::class) {
+            if ($this->container->has(AppErrorHandler::NOT_FOUND) && get_class($exception) === NotFound::class) {
 
                 $this->response->errorHeader(ResponseCode::NOT_FOUND);
-                $this->container->get('notFoundHandler', $exception);
+                $this->container->get(AppErrorHandler::NOT_FOUND, $exception);
 
-            } elseif ($this->container->has('notAllowedHandler') && get_class($exception) === MethodNotAllowed::class) {
+            } elseif ($this->container->has(AppErrorHandler::NOT_ALLOWED) && get_class($exception) === MethodNotAllowed::class) {
 
                 $this->response->errorHeader(ResponseCode::METHOD_NOT_ALLOWED);
-                $this->container->get('notAllowedHandler', $exception);
+                $this->container->get(AppErrorHandler::NOT_ALLOWED, $exception);
 
-            } elseif ($this->container->has('errorHandler') && 0 === strpos(get_class($exception), Exception\Core::class)) {
-
-                $this->response->errorHeader(ResponseCode::INTERNAL_SERVER_ERROR);
-                $this->container->get('errorHandler', $exception);
-
-            } elseif ($this->container->has('phpHandler')) {
+            } elseif ($this->container->has(AppErrorHandler::CORE_ERROR) && 0 === strpos(get_class($exception), Exception\Core::class)) {
 
                 $this->response->errorHeader(ResponseCode::INTERNAL_SERVER_ERROR);
-                $this->container->get('phpHandler', $exception);
+                $this->container->get(AppErrorHandler::CORE_ERROR, $exception);
+
+            } elseif ($this->container->has(AppErrorHandler::PHP_ERROR)) {
+
+                $this->response->errorHeader(ResponseCode::INTERNAL_SERVER_ERROR);
+                $this->container->get(AppErrorHandler::PHP_ERROR, $exception);
 
             } else {
 
