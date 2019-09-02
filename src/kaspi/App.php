@@ -4,7 +4,8 @@ namespace Kaspi;
 
 use Kaspi\Exception\AppException;
 use Kaspi\Exception\ContainerException;
-use Kaspi\Exception\Core;
+use Kaspi\Exception\Router\MethodNotAllowed;
+use Kaspi\Exception\Router\NotFound;
 use function date_default_timezone_set;
 use function setlocale;
 
@@ -52,11 +53,6 @@ class App
         } catch (ContainerException $exception) {
             throw new AppException($exception->getMessage(), $exception->getCode(), $exception);
         }
-    }
-
-    public function __set($name, $value)
-    {
-        throw new AppException('Can not set public property in App');
     }
 
     public function getContainer(): Container
@@ -129,12 +125,12 @@ class App
         return $this->router->middleware($callable);
     }
 
-    public function exceptionTemplate(string $responsePhrase, string $message, string $traceAsString): string
+    public function exceptionTemplate(string $responsePhrase, string $message, string $traceAsString, string $class): string
     {
         if (!self::getConfig()->displayErrorDetails()) {
             $traceAsString = '';
         } else {
-            $traceAsString = '<pre>' . $traceAsString . '</pre>';
+            $traceAsString = '<br>' . $class . PHP_EOL . '<pre>' . $traceAsString . '</pre>' . PHP_EOL;
         }
         return <<< EOF
                 <html><head>
@@ -151,28 +147,46 @@ EOF;
     {
         try {
             $this->router->resolve();
-        } catch (Core $exception) {
+        } catch (\Exception $exception) {
 
             $this->response->resetHeaders();
             $this->response->resetBody();
 
-            if ($this->container->has('notFoundHandler')) {
+            if ($this->container->has('notFoundHandler') && get_class($exception) === NotFound::class) {
+
                 $this->response->errorHeader(ResponseCode::NOT_FOUND);
                 $this->container->get('notFoundHandler', $exception);
-            }elseif ($this->container->has('notAllowedHandler')) {
+
+            } elseif ($this->container->has('notAllowedHandler') && get_class($exception) === MethodNotAllowed::class) {
+
                 $this->response->errorHeader(ResponseCode::METHOD_NOT_ALLOWED);
                 $this->container->get('notAllowedHandler', $exception);
-            }elseif ($this->container->has('coreHandler')) {
+
+            } elseif ($this->container->has('errorHandler') && 0 === strpos(get_class($exception), Exception\Core::class)) {
+
                 $this->response->errorHeader(ResponseCode::INTERNAL_SERVER_ERROR);
-                $this->container->get('coreHandler', $exception);
-            } else  {
-                $exceptionCode = $exception->getCode()?: ResponseCode::INTERNAL_SERVER_ERROR;
+                $this->container->get('errorHandler', $exception);
+
+            } elseif ($this->container->has('phpHandler')) {
+
+                $this->response->errorHeader(ResponseCode::INTERNAL_SERVER_ERROR);
+                $this->container->get('phpHandler', $exception);
+
+            } else {
+
+                $exceptionCode = $exception->getCode() ?: ResponseCode::INTERNAL_SERVER_ERROR;
                 $exceptionMessage = $exception->getMessage();
                 $traceAsString = $exception->getTraceAsString();
 
                 $this->response->errorHeader($exceptionCode);
-                $body = $this->exceptionTemplate(ResponseCode::PHRASES[$exceptionCode], $exceptionMessage, $traceAsString);
+                $body = $this->exceptionTemplate(
+                    ResponseCode::PHRASES[$exceptionCode],
+                    $exceptionMessage,
+                    $traceAsString,
+                    get_class($exception)
+                );
                 $this->response->setBody($body);
+
             }
         } finally {
             $requestTimeFloat = (float)str_replace(',', '.', $this->request->getEnv('REQUEST_TIME_FLOAT'));
