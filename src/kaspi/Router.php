@@ -30,14 +30,14 @@ final class Router
     private const ROUTE_PATTERN = 'ROUTE_PATTERN';
     private const ROUTE_MIDDLEWARE = 'ROUTE_MIDDLEWARE';
 
-    public function __construct(Request $request, Response $response, ?Container $container = null)
+    public function __construct(Request $request, Response $response, Container $container, ?Config $config = null)
     {
         $this->routes = [];
         $this->middleware = [];
         $this->request = $request;
         $this->response = $response;
         $this->container = $container;
-        $this->config = App::getConfig();
+        $this->config = $config ?: $container->get(Config::class);
     }
 
     public static function getCurrentRouteName(): ?string
