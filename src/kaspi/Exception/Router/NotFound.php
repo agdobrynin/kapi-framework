@@ -1,6 +1,6 @@
 <?php
 
-namespace Kaspi\Exception\Core\Router;
+namespace Kaspi\Exception\Router;
 
 use Kaspi\Exception\Core\RouterException;
 

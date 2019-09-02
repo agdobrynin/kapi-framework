@@ -2,8 +2,8 @@
 
 namespace Kaspi;
 
-use Kaspi\Exception\Core\Router\MethodNotAllowed;
-use Kaspi\Exception\Core\Router\NotFound;
+use Kaspi\Exception\Router\MethodNotAllowed;
+use Kaspi\Exception\Router\NotFound;
 use Kaspi\Exception\Core\RouterException;
 
 final class Router
