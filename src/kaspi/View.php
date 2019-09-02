@@ -20,7 +20,7 @@ class View
     public function __construct(Config $config)
     {
         try {
-            $this->viewPath = realpath($config->getViewPath()).'/';
+            $this->viewPath = realpath($config->getViewPath()) . '/';
         } catch (ConfigException $exception) {
             throw new ViewException($exception->getMessage());
         }
@@ -51,6 +51,11 @@ class View
         return null;
     }
 
+    public function addExt(string $extName, callable $callable): bool
+    {
+        return $this->addExtension($extName, $callable);
+    }
+
     /**
      * Позволяет извлечь \Closure объект и выполнять его
      *
@@ -71,6 +76,11 @@ class View
         return null;
     }
 
+    public function getExt(string $extName): ?\Closure
+    {
+        return $this->getExtension($extName);
+    }
+
     public function addGlobalData(string $key, $data): void
     {
         $this->globalData[$key] = $data;
@@ -80,14 +90,14 @@ class View
     {
         $data = array_merge($data, $this->globalData);
         extract($data, EXTR_OVERWRITE);
-        include $this->viewPath.$fileName;
+        include $this->viewPath . $fileName;
     }
 
     /**
      * Расширение существующего шаблона из текущего.
      *
      * @param string $layout путь к расширяемому шаблону
-     * @param array  $data   переменные передаваемые в шаблон
+     * @param array $data    переменные передаваемые в шаблон
      */
     private function layout(string $layout, array $data = []): void
     {
@@ -123,7 +133,7 @@ class View
 
     public function render(string $template, array $data = []): string
     {
-        $template = $this->viewPath.$template.($this->useExtension ? '' : '.php');
+        $template = $this->viewPath . $template . ($this->useExtension ? '' : '.php');
         if (file_exists($template)) {
             $this->layout = new \StdClass();
             $data = array_merge($data, $this->globalData);
@@ -139,6 +149,6 @@ class View
 
             return $content;
         }
-        throw new ViewException('View does not exist: '.$template);
+        throw new ViewException('View does not exist: ' . $template);
     }
 }
