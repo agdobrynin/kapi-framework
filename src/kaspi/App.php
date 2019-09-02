@@ -2,6 +2,7 @@
 
 namespace Kaspi;
 
+use Kaspi\Exception\AppErrorHandler;
 use Kaspi\Exception\AppException;
 use Kaspi\Exception\ContainerException;
 use Kaspi\Exception\Router\MethodNotAllowed;
