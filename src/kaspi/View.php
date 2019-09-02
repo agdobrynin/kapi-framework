@@ -29,6 +29,11 @@ class View
         $this->useExtension = $config->getViewUseTemplateExtension();
     }
 
+    public function getConfig(): Config
+    {
+        return $this->config;
+    }
+
     /**
      * Позволяет добавить \Closure объект и выолнить с помощью View::getExtension
      *
