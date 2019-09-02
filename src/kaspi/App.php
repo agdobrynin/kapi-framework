@@ -20,31 +20,39 @@ class App
     /** @var Container|null */
     public $container;
     /** @var Config */
-    private static $config;
+    public $config;
     /** @var Router */
     private $router;
 
     public function __construct(Config $config, ?Request $request = null, ?Response $response = null, ?Container $container = null)
     {
-        self::$config = $config;
+        if (null === $container) {
+            $container = new Container();
+        }
+        $this->container = $container;
+
+        $this->config = $config;
+        $this->container->set(Config::class, static function () use ($config) {
+            return $config;
+        });
 
         if (null === $request) {
             $request = new Request();
         }
         $this->request = $request;
+        $this->container->set(Request::class, static function () use ($request) {
+            return $request;
+        });
 
         if (null === $response) {
             $response = new Response();
         }
         $this->response = $response;
-
-        if (null === $container) {
-            $container = new Container();
-        }
-        $this->container = $container;
+        $this->container->set(Response::class, static function () use ($response) {
+            return $response;
+        });
         
         // Router помещаем в контейнер чтобы можно было использовать его например в контроллерах и милварах
-        $container = $this->container;
         try {
             $this->container->set(Router::class, static function () use ($request, $response, $container): Router {
                 return new Router($request, $response, $container);
@@ -62,12 +70,12 @@ class App
 
     public function setLocale(): void
     {
-        setlocale(self::$config->getLocaleCategory(), ...self::$config->getLocale());
+        setlocale($this->config->getLocaleCategory(), ... $this->config->getLocale());
     }
 
     public function setTimeZone(): void
     {
-        date_default_timezone_set(self::$config->getTimeZone());
+        date_default_timezone_set($this->config->getTimeZone());
     }
 
     public function getRequest(): Request
@@ -78,11 +86,6 @@ class App
     public function getResponse(): Response
     {
         return $this->response;
-    }
-
-    public static function getConfig(): Config
-    {
-        return self::$config;
     }
 
     public function uri(): string
@@ -127,7 +130,7 @@ class App
 
     public function exceptionTemplate(string $responsePhrase, string $message, string $traceAsString, string $class): string
     {
-        if (!self::getConfig()->displayErrorDetails()) {
+        if (!$this->config->displayErrorDetails()) {
             $traceAsString = '';
         } else {
             $traceAsString = '<br>' . $class . PHP_EOL . '<pre>' . $traceAsString . '</pre>' . PHP_EOL;
