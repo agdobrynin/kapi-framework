@@ -50,6 +50,7 @@ final class Router
         $key = array_search($routeName, array_column($this->routes, self::ROUTE_NAME), true);
         if ($key !== false) {
             // TODO так как возвращается pattern роутера, то там могут быть regex выражения, подуймай как их менять!
+            // (?<word>\w+) , (?<id>\d+), (?<zip>([0-9]{6})), (?<isbn>([a-z]{3})-([0-9]{4,6})-([a-z]{3,}))
             return $this->routes[$key][self::ROUTE_PATTERN];
         }
         return null;
