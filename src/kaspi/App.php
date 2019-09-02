@@ -153,7 +153,7 @@ EOF;
             $this->router->resolve();
         } catch (Core $exception) {
 
-            $this->response->resetHeader();
+            $this->response->resetHeaders();
             $this->response->resetBody();
 
             if ($this->container->has('notFoundHandler')) {
