@@ -45,6 +45,16 @@ final class Router
         return self::$currentRouteName;
     }
 
+    public function getRoutePatternByName(string $routeName, ?array $args = null): ?string
+    {
+        $key = array_search($routeName, array_column($this->routes, self::ROUTE_NAME), true);
+        if ($key !== false) {
+            // TODO так как возвращается pattern роутера, то там могут быть regex выражения, подуймай как их менять!
+            return $this->routes[$key][self::ROUTE_PATTERN];
+        }
+        return null;
+    }
+
     public function get(string $routePattern, $callable): self
     {
         $this->map($routePattern, $callable, $this->request::METHOD_GET);
@@ -88,40 +98,21 @@ final class Router
     }
 
     /**
-     * Добмавить мидлвару к роуту или глобальную.
+     * Добавить мидлвару к роуту или глобальную.
      */
     public function middleware($callable): self
     {
         $calledClass = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['class'] ?? '';
         $isGlobalMiddleware = App::class === $calledClass;
-        // глобавльная мидлвара
-        if ($isGlobalMiddleware) {
-            $lastRoute = '';
-            $next = static function () {
-            };
-        } else {
-            end($this->routes);
-            $lastRoute = key($this->routes);
-            $next = $this->routes[$lastRoute][self::ROUTE_ACTION];
-        }
-
-        if (is_string($callable)) {
-            if (!class_exists($callable)) {
-                throw new RouterException(sprintf('Middleware `%s` not defined', $callable));
-            }
-            $callable = new $callable($this->request, $this->response, $this->container, $next);
-        }
-
-        if (!is_callable($callable)) {
-            throw new RouterException(sprintf('Middleware `%s` is not callable', $callable));
-        }
 
         if ($isGlobalMiddleware) {
             $this->middleware[] = $callable;
         } else {
+            end($this->routes);
+            $lastRoute = key($this->routes);
             $this->routes[$lastRoute][self::ROUTE_MIDDLEWARE][] = $callable;
+            reset($this->routes);
         }
-        reset($this->routes);
 
         return $this;
     }
@@ -141,33 +132,24 @@ final class Router
         return $this;
     }
 
-    public function getRoutePatternByName(string $routeName, ?array $args = null): ?string
-    {
-        $key = array_search($routeName, array_column($this->routes, self::ROUTE_NAME), true);
-        if ($key !== false) {
-            // TODO так как возвращается pattern роутера, то там могут быть regex выражения, подуймай как их менять!
-            return $this->routes[$key][self::ROUTE_PATTERN];
-        }
-        return null;
-    }
-
     /**
      * @param string $routePattern  может быть роут с регулярными выражениями
      * @param mixed $callable       дейтвие
      * @param string $requestMethod request method
      * @param string|null $name     имя роута
-     *
-     * @throws RouterException
      */
     public function map(string $routePattern, $callable, ?string $requestMethod = '', ?string $name = null): void
     {
-        // Проверка на добавление только разрешенные методы запросов
-        if (!$this->request->isValidRequestMethod()) {
-            throw new MethodNotAllowed(
-                sprintf('Request method `%s` is not support', $requestMethod),
-                ResponseCode::METHOD_NOT_ALLOWED
-            );
-        }
+        $this->routes[] = [
+            self::ROUTE_PATTERN => $routePattern,
+            self::ROUTE_METHOD => $requestMethod,
+            self::ROUTE_ACTION => $callable,
+            self::ROUTE_NAME => $name,
+        ];
+    }
+
+    private function resolveRoute($callable): callable
+    {
         // контроллер
         if (is_string($callable)) {
             if (false !== strpos($callable, $this->defaultActionSymbol)) {
@@ -193,36 +175,27 @@ final class Router
         if (!is_callable($callableResult)) {
             throw new RouterException(sprintf('Controller `%s` is not callable', $callable));
         }
-        $this->routes[] = [
-            self::ROUTE_PATTERN => $routePattern,
-            self::ROUTE_METHOD => $requestMethod,
-            self::ROUTE_ACTION => $callableResult,
-            self::ROUTE_NAME => $name,
-        ];
+
+        return $callableResult;
     }
 
-    private function resolveMiddlewareGlobal(callable $routeAction): ?bool
+    private function resolveMiddlewareAndExecute(array $arrMiddleware, callable $next): ?bool
     {
-        foreach ($this->middleware as $middleware) {
-            if (is_callable($middleware)) {
-                $callable = new $middleware($this->request, $this->response, $this->container, $routeAction);
-                if (null !== $callable()) {
-                    return true;
+        foreach ($arrMiddleware as $middleware) {
+            if (is_string($middleware)) {
+                if (!class_exists($middleware)) {
+                    throw new RouterException(sprintf('Middleware `%s` not defined', $middleware));
                 }
+                $middleware = new $middleware($this->request, $this->response, $this->container, $next);
             }
-        }
 
-        return null;
-    }
-
-    private function resolveMiddleware(?array $arrayCallable): ?bool
-    {
-        foreach ($arrayCallable as $middleware) {
+            if (!is_callable($middleware)) {
+                throw new RouterException(sprintf('Middleware `%s` is not callable', $middleware));
+            }
             if (null !== $middleware()) {
                 return true;
             }
         }
-
         return null;
     }
 
@@ -240,13 +213,16 @@ final class Router
             $routeMethod = $route[self::ROUTE_METHOD];
             /** @var string $routeName */
             $routeName = $route[self::ROUTE_NAME];
-            /** @var callable $routeAction */
+            /** @var mixed $routeAction */
             $routeAction = $route[self::ROUTE_ACTION];
             /** @var array $routeMiddleware */
             $routeMiddleware = $route[self::ROUTE_MIDDLEWARE] ?? [];
             if (1 === preg_match('@^' . $routePattern . $trailingSlash . '$@D', $this->request->uri(), $matches)) {
+                // Проверка разрешенные методы запросов
                 $isValidRout = empty($routeMethod) || $this->request->getRequestMethod() === $routeMethod;
                 if ($isValidRout) {
+
+                    $routeAction = $this->resolveRoute($routeAction);
                     self::$currentRouteName = $routeName;
                     $params = array_intersect_key(
                         $matches,
@@ -255,11 +231,11 @@ final class Router
                     // Установим в Request параметры полученные от роута через regExp переменные
                     $this->request->setAttributes($params);
                     // Глобальные мидлвары
-                    if (null !== $this->resolveMiddlewareGlobal($routeAction)) {
+                    if (null !== $this->resolveMiddlewareAndExecute($this->middleware, $routeAction)) {
                         return;
                     }
                     // Мидлвары привязанные к роуту
-                    if (null !== $this->resolveMiddleware($routeMiddleware)) {
+                    if (null !== $this->resolveMiddlewareAndExecute($routeMiddleware, $routeAction)) {
                         return;
                     }
                     // Для вызова маршрута с колбэк функциями, удобно для коротких контроллеров rest api
@@ -269,12 +245,18 @@ final class Router
                 }
             }
         }
+
         if (isset($isValidRout)) {
             throw new MethodNotAllowed(
-                sprintf('Method not allowed at route %s', $this->request->uri()),
+                sprintf(
+                    'Method %s not allowed at route %s',
+                    $this->request->getRequestMethod(),
+                    $this->request->uri()
+                ),
                 ResponseCode::METHOD_NOT_ALLOWED
             );
         }
+
         throw new NotFound(
             sprintf(
                 'The requested resource %s could not be found. Please verify the URI and try again',
