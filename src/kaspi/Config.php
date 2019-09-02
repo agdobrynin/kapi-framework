@@ -2,7 +2,7 @@
 
 namespace Kaspi;
 
-use Kaspi\Exception\ConfigException;
+use Kaspi\Exception\Core\ConfigException;
 
 class Config
 {

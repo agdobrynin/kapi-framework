@@ -3,10 +3,10 @@
 namespace Kaspi;
 
 use Kaspi\Exception\AppErrorHandler;
-use Kaspi\Exception\AppException;
-use Kaspi\Exception\ContainerException;
-use Kaspi\Exception\Router\MethodNotAllowed;
-use Kaspi\Exception\Router\NotFound;
+use Kaspi\Exception\Core\AppException;
+use Kaspi\Exception\Core\ContainerException;
+use Kaspi\Exception\Core\Router\MethodNotAllowed;
+use Kaspi\Exception\Core\Router\NotFound;
 use function date_default_timezone_set;
 use function setlocale;
 

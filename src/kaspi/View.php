@@ -2,8 +2,8 @@
 
 namespace Kaspi;
 
-use Kaspi\Exception\ConfigException;
-use Kaspi\Exception\ViewException;
+use Kaspi\Exception\Core\ConfigException;
+use Kaspi\Exception\Core\ViewException;
 
 class View
 {

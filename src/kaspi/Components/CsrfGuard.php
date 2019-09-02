@@ -3,7 +3,7 @@
 namespace Kaspi\Components;
 
 use Kaspi\Config;
-use Kaspi\Exception\CsrfGuardException;
+use Kaspi\Exception\Core\CsrfGuardException;
 use Kaspi\Request;
 
 class CsrfGuard

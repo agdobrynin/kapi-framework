@@ -2,7 +2,7 @@
 
 namespace Kaspi;
 
-use Kaspi\Exception\ContainerException;
+use Kaspi\Exception\Core\ContainerException;
 
 class Container
 {
