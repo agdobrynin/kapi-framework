@@ -171,7 +171,7 @@ EOF;
                 $this->response->errorHeader(ResponseCode::INTERNAL_SERVER_ERROR);
                 $this->container->get(AppErrorHandler::CORE_ERROR, $exception);
 
-            } elseif ($this->container->has(AppErrorHandler::PHP_ERROR)) {
+            } elseif ($this->container->has(AppErrorHandler::PHP_ERROR) && false === strpos(get_class($exception), __NAMESPACE__)) {
 
                 $this->response->errorHeader(ResponseCode::INTERNAL_SERVER_ERROR);
                 $this->container->get(AppErrorHandler::PHP_ERROR, $exception);
