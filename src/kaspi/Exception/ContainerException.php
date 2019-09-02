@@ -2,6 +2,6 @@
 
 namespace Kaspi\Exception;
 
-class ContainerException extends \Exception
+class ContainerException extends Core
 {
 }

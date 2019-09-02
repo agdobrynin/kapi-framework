@@ -2,6 +2,7 @@
 
 namespace Kaspi\Exception;
 
-class RouterException extends Core
+class Core extends \Exception
 {
+
 }

@@ -2,6 +2,6 @@
 
 namespace Kaspi\Exception;
 
-class ConfigException extends \Exception
+class ConfigException extends Core
 {
 }

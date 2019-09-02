@@ -2,6 +2,6 @@
 
 namespace Kaspi\Exception;
 
-class CsrfGuardException extends \Exception
+class CsrfGuardException extends Core
 {
 }
