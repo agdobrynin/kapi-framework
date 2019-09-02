@@ -52,7 +52,7 @@ class App
         $this->container->set(Response::class, static function () use ($response) {
             return $response;
         });
-        
+
         // Router помещаем в контейнер чтобы можно было использовать его например в контроллерах и милварах
         try {
             $this->container->set(Router::class, static function () use ($request, $response, $container): Router {
@@ -71,7 +71,7 @@ class App
 
     public function setLocale(): void
     {
-        setlocale($this->config->getLocaleCategory(), ... $this->config->getLocale());
+        setlocale($this->config->getLocaleCategory(), ...$this->config->getLocale());
     }
 
     public function setTimeZone(): void
@@ -134,8 +134,9 @@ class App
         if (!$this->config->displayErrorDetails()) {
             $traceAsString = '';
         } else {
-            $traceAsString = '<br>' . $class . PHP_EOL . '<pre>' . $traceAsString . '</pre>' . PHP_EOL;
+            $traceAsString = '<br>'.$class.PHP_EOL.'<pre>'.$traceAsString.'</pre>'.PHP_EOL;
         }
+
         return <<< EOF
                 <html><head>
                 <title>{$responsePhrase}</title>
@@ -152,32 +153,22 @@ EOF;
         try {
             $this->router->resolve();
         } catch (\Throwable $exception) {
-
             $this->response->resetHeaders();
             $this->response->resetBody();
 
-            if ($this->container->has(AppErrorHandler::NOT_FOUND) && get_class($exception) === NotFound::class) {
-
+            if ($this->container->has(AppErrorHandler::NOT_FOUND) && NotFound::class === get_class($exception)) {
                 $this->response->errorHeader(ResponseCode::NOT_FOUND);
                 $this->container->get(AppErrorHandler::NOT_FOUND, $exception);
-
-            } elseif ($this->container->has(AppErrorHandler::NOT_ALLOWED) && get_class($exception) === MethodNotAllowed::class) {
-
+            } elseif ($this->container->has(AppErrorHandler::NOT_ALLOWED) && MethodNotAllowed::class === get_class($exception)) {
                 $this->response->errorHeader(ResponseCode::METHOD_NOT_ALLOWED);
                 $this->container->get(AppErrorHandler::NOT_ALLOWED, $exception);
-
             } elseif ($this->container->has(AppErrorHandler::CORE_ERROR) && 0 === strpos(get_class($exception), Exception\Core::class)) {
-
                 $this->response->errorHeader(ResponseCode::INTERNAL_SERVER_ERROR);
                 $this->container->get(AppErrorHandler::CORE_ERROR, $exception);
-
             } elseif ($this->container->has(AppErrorHandler::PHP_ERROR) && false === strpos(get_class($exception), __NAMESPACE__)) {
-
                 $this->response->errorHeader(ResponseCode::INTERNAL_SERVER_ERROR);
                 $this->container->get(AppErrorHandler::PHP_ERROR, $exception);
-
             } else {
-
                 $exceptionCode = $exception->getCode() ?: ResponseCode::INTERNAL_SERVER_ERROR;
                 $exceptionMessage = $exception->getMessage();
                 $traceAsString = $exception->getTraceAsString();
@@ -190,10 +181,9 @@ EOF;
                     get_class($exception)
                 );
                 $this->response->setBody($body);
-
             }
         } finally {
-            $requestTimeFloat = (float)str_replace(',', '.', $this->request->getEnv('REQUEST_TIME_FLOAT'));
+            $requestTimeFloat = (float) str_replace(',', '.', $this->request->getEnv('REQUEST_TIME_FLOAT'));
             if ($time = (microtime(true) - $requestTimeFloat)) {
                 $this->response->setHeader('X-Generation-time', $time);
             }

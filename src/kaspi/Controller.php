@@ -22,6 +22,7 @@ class Controller
     {
         /** @var Router $router */
         $router = $this->container->{Router::class};
+
         return $router->getRoutePatternByName($routeName, $args);
     }
 }

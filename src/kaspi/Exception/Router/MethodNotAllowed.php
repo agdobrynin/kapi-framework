@@ -6,5 +6,4 @@ use Kaspi\Exception\Core;
 
 class MethodNotAllowed extends Core
 {
-
 }

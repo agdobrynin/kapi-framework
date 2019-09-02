@@ -2,9 +2,9 @@
 
 namespace Kaspi;
 
+use Kaspi\Exception\Core\RouterException;
 use Kaspi\Exception\Router\MethodNotAllowed;
 use Kaspi\Exception\Router\NotFound;
-use Kaspi\Exception\Core\RouterException;
 
 final class Router
 {
@@ -16,13 +16,13 @@ final class Router
     /** @var string */
     private $defaultActionSymbol = '@';
     /** @var Request */
-    protected $request;
+    private $request;
     /** @var Response */
-    protected $response;
+    private $response;
     /** @var Container|null */
-    protected $container;
+    private $container;
     /** @var Config */
-    protected $config;
+    private $config;
 
     private const ROUTE_METHOD = 'ROUTE_METHOD';
     private const ROUTE_ACTION = 'ROUTE_ACTION';
@@ -48,11 +48,12 @@ final class Router
     public function getRoutePatternByName(string $routeName, ?array $args = null): ?string
     {
         $key = array_search($routeName, array_column($this->routes, self::ROUTE_NAME), true);
-        if ($key !== false) {
+        if (false !== $key) {
             // TODO так как возвращается pattern роутера, то там могут быть regex выражения, подуймай как их менять!
             // (?<word>\w+) , (?<id>\d+), (?<zip>([0-9]{6})), (?<isbn>([a-z]{3})-([0-9]{4,6})-([a-z]{3,}))
             return $this->routes[$key][self::ROUTE_PATTERN];
         }
+
         return null;
     }
 
@@ -134,10 +135,10 @@ final class Router
     }
 
     /**
-     * @param string $routePattern  может быть роут с регулярными выражениями
-     * @param mixed $callable       дейтвие
-     * @param string $requestMethod request method
-     * @param string|null $name     имя роута
+     * @param string      $routePattern  может быть роут с регулярными выражениями
+     * @param mixed       $callable      дейтвие
+     * @param string      $requestMethod request method
+     * @param string|null $name          имя роута
      */
     public function map(string $routePattern, $callable, ?string $requestMethod = '', ?string $name = null): void
     {
@@ -197,6 +198,7 @@ final class Router
                 return true;
             }
         }
+
         return null;
     }
 
@@ -218,11 +220,10 @@ final class Router
             $routeAction = $route[self::ROUTE_ACTION];
             /** @var array $routeMiddleware */
             $routeMiddleware = $route[self::ROUTE_MIDDLEWARE] ?? [];
-            if (1 === preg_match('@^' . $routePattern . $trailingSlash . '$@D', $this->request->uri(), $matches)) {
+            if (1 === preg_match('@^'.$routePattern.$trailingSlash.'$@D', $this->request->uri(), $matches)) {
                 // Проверка разрешенные методы запросов
                 $isValidRout = empty($routeMethod) || $this->request->getRequestMethod() === $routeMethod;
                 if ($isValidRout) {
-
                     $routeAction = $this->resolveRoute($routeAction);
                     self::$currentRouteName = $routeName;
                     $params = array_intersect_key(

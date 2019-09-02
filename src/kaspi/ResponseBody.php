@@ -27,6 +27,7 @@ class ResponseBody
 
         try {
             $this->rewind();
+
             return $this->getContents();
         } catch (\RuntimeException $e) {
             return '';
@@ -38,6 +39,7 @@ class ResponseBody
         if (false === ($contents = stream_get_contents($this->stream))) {
             throw new \RuntimeException('Could not get contents of stream');
         }
+
         return $contents;
     }
 

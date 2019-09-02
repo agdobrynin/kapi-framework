@@ -37,11 +37,11 @@ class Container
         $this->container[$name] = $container;
     }
 
-    public function get(string $name, ... $arg)
+    public function get(string $name, ...$arg)
     {
         if (!empty($this->container[$name])) {
             if (empty($this->resolvedContainer[$name])) {
-                $this->resolvedContainer[$name] = $this->container[$name](... $arg);
+                $this->resolvedContainer[$name] = $this->container[$name](...$arg);
             }
 
             return $this->resolvedContainer[$name];

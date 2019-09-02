@@ -1,11 +1,11 @@
 <?php
 
 namespace Kaspi\Exception;
+
 /**
- * Имена хэндлеров для обработки Exception-ов
+ * Имена хэндлеров для обработки Exception-ов.
  *
  * Class AppErrorHandler
- * @package Kaspi
  */
 class AppErrorHandler
 {
@@ -14,15 +14,15 @@ class AppErrorHandler
      */
     public const NOT_FOUND = 'notFoundHandler';
     /**
-     * метод не доступен для выполяемого роута
+     * метод не доступен для выполяемого роута.
      */
     public const NOT_ALLOWED = 'notAllowedHandler';
     /**
-     * Exception фреймворка - namespace начинается с Kaspi\Exception\Core
+     * Exception фреймворка - namespace начинается с Kaspi\Exception\Core.
      */
     public const CORE_ERROR = 'errorHandler';
     /**
-     * Exception выброшенный php
+     * Exception выброшенный php.
      */
     public const PHP_ERROR = 'phpHandler';
 }

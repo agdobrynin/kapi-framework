@@ -20,6 +20,7 @@ class Response
     public function setResponsePhrase(string $phrase): self
     {
         $this->responsePhrase = $phrase;
+
         return $this;
     }
 
@@ -43,7 +44,8 @@ class Response
         return $this->headers->get()[$header] ?? null;
     }
 
-    public function resetHeaders():void {
+    public function resetHeaders(): void
+    {
         $this->headers->reset();
     }
 
@@ -60,7 +62,7 @@ class Response
         return $this->body->getContents();
     }
 
-    public function resetBody():void
+    public function resetBody(): void
     {
         $this->body->close();
     }
@@ -69,6 +71,7 @@ class Response
     {
         $this->setBody(json_encode($data, $options, $depth))
             ->setHeader('Content-Type', 'application/json');
+
         return $this;
     }
 

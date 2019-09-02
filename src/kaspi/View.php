@@ -22,7 +22,7 @@ class View
     {
         $this->config = $config;
         try {
-            $this->viewPath = realpath($config->getViewPath()) . '/';
+            $this->viewPath = realpath($config->getViewPath()).'/';
         } catch (ConfigException $exception) {
             throw new ViewException($exception->getMessage());
         }
@@ -35,7 +35,7 @@ class View
     }
 
     /**
-     * Позволяет добавить \Closure объект и выолнить с помощью View::getExtension
+     * Позволяет добавить \Closure объект и выолнить с помощью View::getExtension.
      *
      * $view = new View(...);
      * $view->addExtension('my-ext', function(?$param) {
@@ -43,18 +43,15 @@ class View
      *      // но если они нужны их надо объявить они понадобятся при вызове
      *      // здесь код функции
      * });
-     *
-     * @param string $extName
-     * @param callable $callable
-     *
-     * @return bool
      */
     public function addExtension(string $extName, callable $callable): bool
     {
         if (empty($this->extensions[$extName])) {
             $this->extensions[$extName] = $callable;
+
             return true;
         }
+
         return null;
     }
 
@@ -64,22 +61,19 @@ class View
     }
 
     /**
-     * Позволяет извлечь \Closure объект и выполнять его
+     * Позволяет извлечь \Closure объект и выполнять его.
      *
      * В шаблоне вызвать если нет параметров
      * $this->getExtension('my-ext')();
      * если параметры есть
      * $this->getExtension('my-ext')('param1' [[, 'param2'], ...]);
-     *
-     * @param string $extName
-     *
-     * @return \Closure|null
      */
     public function getExtension(string $extName): ?\Closure
     {
         if (!empty($this->extensions[$extName])) {
             return $this->extensions[$extName];
         }
+
         return null;
     }
 
@@ -97,14 +91,14 @@ class View
     {
         $data = array_merge($data, $this->globalData);
         extract($data, EXTR_OVERWRITE);
-        include $this->viewPath . $fileName;
+        include $this->viewPath.$fileName;
     }
 
     /**
      * Расширение существующего шаблона из текущего.
      *
      * @param string $layout путь к расширяемому шаблону
-     * @param array $data    переменные передаваемые в шаблон
+     * @param array  $data   переменные передаваемые в шаблон
      */
     private function layout(string $layout, array $data = []): void
     {
@@ -140,7 +134,7 @@ class View
 
     public function render(string $template, array $data = []): string
     {
-        $template = $this->viewPath . $template . ($this->useExtension ? '' : '.php');
+        $template = $this->viewPath.$template.($this->useExtension ? '' : '.php');
         if (file_exists($template)) {
             $this->layout = new \StdClass();
             $data = array_merge($data, $this->globalData);
@@ -156,6 +150,6 @@ class View
 
             return $content;
         }
-        throw new ViewException('View does not exist: ' . $template);
+        throw new ViewException('View does not exist: '.$template);
     }
 }
