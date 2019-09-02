@@ -65,7 +65,9 @@ class ResponseBody
 
     public function close(): void
     {
-        fclose($this->stream);
+        if ($this->stream) {
+            fclose($this->stream);
+        }
         $this->detach();
     }
 
