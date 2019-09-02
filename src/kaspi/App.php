@@ -151,7 +151,7 @@ EOF;
     {
         try {
             $this->router->resolve();
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
 
             $this->response->resetHeaders();
             $this->response->resetBody();
