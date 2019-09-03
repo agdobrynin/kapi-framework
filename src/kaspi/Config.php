@@ -42,6 +42,16 @@ class Config
         return $this->config['db']['options'] ?: null;
     }
 
+    public function getMigrationPath(): ?string
+    {
+        return $this->config['db']['migration']['path'] ?? null;
+    }
+
+    public function getMigrationTable(): ?string
+    {
+        return $this->config['db']['migration']['table'] ?? null;
+    }
+
     public function getViewPath(): ?string
     {
         $path = $this->config['view']['path'] ?: null;
