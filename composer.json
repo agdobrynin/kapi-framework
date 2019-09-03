@@ -31,5 +31,6 @@
   },
   "scripts": {
     "fixer" : "sh vendor/bin/php-cs-fixer fix"
-  }
+  },
+  "bin": ["bin/kaspi-migrate"]
 }

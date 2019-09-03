@@ -1,0 +1,131 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Консольная командная утилита для миграций
+ */
+
+require __DIR__ . '/../../../autoload.php';
+
+use splitbrain\phpcli\CLI;
+use splitbrain\phpcli\Exception;
+use splitbrain\phpcli\Options;
+use splitbrain\phpcli\Colors;
+use splitbrain\phpcli\TableFormatter;
+use Kaspi\Migration\ConsoleAction;
+use Kaspi\Config;
+
+class KaspiMigrate extends CLI
+{
+    private $migrationConsole;
+
+    protected function setup(Options $options)
+    {
+        $options->setHelp('Kaspi framework migration tool');
+
+        $options->registerOption(
+            'config',
+            'Application config. Default load config.php in current directory',
+            'c',
+            'filename'
+        );
+
+        $options->registerCommand('init', 'Init migration tool. Check DB connection, make migration folder.');
+
+        $options->registerCommand('status', 'Show all migration statuses');
+
+        $options->registerCommand('create', 'Create new migration');
+        $options->registerArgument('name', 'Migration name', true, 'create');
+
+        $options->registerCommand('migrate', 'Run migration');
+        $options->registerArgument('name', 'Migrate to this name, including it.', false, 'migrate');
+
+        $options->registerCommand('rollback', 'Rollback migration');
+        $options->registerArgument('name', 'Rollback migration to this name, including it', false, 'rollback');
+    }
+
+    protected function showMigrations(array $migrationTable)
+    {
+        $tf = new TableFormatter($this->colors);
+        $tf->setBorder(' | ');
+        $colWidth = array('20%', '*', '35%', '10%');
+        // show a header
+        $result = PHP_EOL . PHP_EOL . $tf->format(
+                $colWidth,
+                array('Version', 'Name', 'Updated', 'Status')
+            );
+        // a line across the whole width
+        $result .= str_pad('', $tf->getMaxWidth(), '-') . "\n";
+        $currentBreakPoint = 0;
+        foreach ($migrationTable as $row) {
+            if ($row['breakpoint'] === 0) {
+                $currentBreakPoint = $row['breakpoint'];
+            }
+            $result .= $tf->format(
+                $colWidth,
+                array(
+                    $row['version'],
+                    $row['name'],
+                    $row['end_time'],
+                    $currentBreakPoint ? 'DOWN' : 'UP'
+                ),
+                array(Colors::C_CYAN, Colors::C_YELLOW, Colors::C_LIGHTCYAN, $currentBreakPoint ? Colors::C_RED : Colors::C_GREEN)
+            );
+            $result .= str_pad('', $tf->getMaxWidth(), '-') . PHP_EOL;
+        }
+        return $result;
+    }
+
+    protected function getConfig(Options $options): array
+    {
+        if ($options->getOpt('config')) {
+            if (is_file($config = $options->getOpt('config'))) {
+                return require $config;
+            }
+        } elseif (is_file('config.php')) {
+            return require 'config.php';
+        }
+        $this->info('Use option --config path/to/config-file.php for loading app config');
+        throw new Exception('Config file not found. Default find config.php in current directory.');
+    }
+
+    protected function main(Options $options)
+    {
+        if (empty($options->getCmd())) {
+            $this->error('No known command was called, we show the default help instead:');
+            echo $options->help();
+            exit;
+        }
+
+        $config = new Config($this->getConfig($options));
+        $this->migrationConsole = new ConsoleAction($config);
+
+        switch ($options->getCmd()) {
+            case 'init':
+                $this->migrationConsole->init($this);
+                $this->success('The init command was called');
+                break;
+            case 'status':
+                print $this->showMigrations($this->migrationConsole->status() ?? []);
+                break;
+            case 'create':
+                $this->success('The create command was called');
+                break;
+            case 'migrate':
+                $this->success('The migrate command was called');
+                break;
+            case 'rollback':
+                $this->success('The rollback command was called');
+                break;
+            default:
+                $this->error('No known command was called, we show the default help instead:');
+                echo $options->help();
+                exit;
+        }
+
+        $this->info('$options->getArgs():');
+        var_dump($options->getArgs());
+    }
+}
+
+$cli = new KaspiMigrate();
+$cli->run();
