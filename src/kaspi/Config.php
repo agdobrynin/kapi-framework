@@ -27,14 +27,29 @@ class Config
         return $this->config['db']['dsn'];
     }
 
+    public function setDbDsnConfig(string $dsn): void
+    {
+        $this->config['db']['dsn'] = $dsn;
+    }
+
     public function getDbUser(): ?string
     {
         return $this->config['db']['user'] ?: null;
     }
 
+    public function setDbUser(string $user): void
+    {
+        $this->config['db']['user'] = $user;
+    }
+
     public function getDbPassword(): ?string
     {
         return $this->config['db']['password'] ?: null;
+    }
+
+    public function setDbPassword(string $password): ?string
+    {
+        return $this->config['db']['password'] = $password;
     }
 
     public function getDbOptions(): ?array
