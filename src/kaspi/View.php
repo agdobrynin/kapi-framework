@@ -74,7 +74,12 @@ class View
     public function getExtension(string $extName, ...$arg)
     {
         if (!empty($this->extensions[$extName])) {
-            return $this->extensions[$extName](...$arg);
+            $func = $this->extensions[$extName];
+            if (count($arg)) {
+                return $func(...$arg);
+            } else {
+                return $func;
+            }
         }
 
         return;
