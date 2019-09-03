@@ -6,10 +6,9 @@ return [
     'displayErrorDetails' => true,
     // настройка для \PDO
     'db' => [
-        // в примере использовалась компонента symfony/dotenv
-        'dsn' => getenv('DB_PDO'),
-        'user' => getenv('DB_USER') ?: '',
-        'password' => getenv('DB_PASS') ?: '',
+        'dsn' => 'sqlite:store/db.db',
+        'user' => '',
+        'password' => '',
         'options' => [
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
         ],
