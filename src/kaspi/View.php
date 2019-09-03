@@ -87,7 +87,7 @@ class View
 
     public function getExt(string $extName, ...$arg)
     {
-        return $this->getExtension($extName)(...$arg);
+        return $this->getExtension($extName, ...$arg);
     }
 
     public function addGlobalData(string $key, $data): void
