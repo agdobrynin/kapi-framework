@@ -89,6 +89,11 @@ class ParamsData
         );
         $this->insert = implode(', ', $templateInsert);
         $this->stmData = array_combine($template, $this->sourceData);
+        foreach ($this->stmData as $key => $value) {
+            if (null === $value) {
+                $this->stmData[$key] = '';
+            }
+        }
         $this->values = implode(', ', $template);
     }
 }
