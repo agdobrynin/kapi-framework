@@ -59,7 +59,7 @@ class Config
 
     public function getMigrationPath(): ?string
     {
-        return $this->config['db']['migration']['path'] ?? null;
+        return realpath($this->config['db']['migration']['path']) . DIRECTORY_SEPARATOR ?? null;
     }
 
     public function getMigrationTable(): ?string
