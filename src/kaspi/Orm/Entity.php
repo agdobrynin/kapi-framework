@@ -37,7 +37,7 @@ abstract class Entity
         return $this->entityClass;
     }
 
-    private function getProperties(): array
+    protected function getProperties(): array
     {
         if (empty($this->fields)) {
             foreach ($this->getEntityClass()->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
