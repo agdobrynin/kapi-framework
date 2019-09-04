@@ -9,7 +9,7 @@ class Migration implements MigrationInterface
     /** @var Config  */
     private $config;
     /** @var \PDO Работа с SQL как со стандартным PDO драйвером! */
-    private $db;
+    protected $db;
 
     public function __construct(Config $config)
     {
