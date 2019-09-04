@@ -126,11 +126,11 @@ abstract class Entity
         return $this->primaryKey;
     }
 
-    public function getEntityDataParams(): ?array
+    public function getEntityDataParams(bool $skipPrimaryKey = true): ?array
     {
         $paramsEntity = [];
         foreach ($this->getProperties() as $property) {
-            if ('id' === $property) {
+            if ($skipPrimaryKey && 'id' === $property) {
                 continue;
             }
             $paramsEntity[$property] = $this->{$property};
