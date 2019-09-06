@@ -116,7 +116,7 @@ class KaspiMigrate extends CLI
                 $this->migrationConsole->down($migrationVersion);
                 break;
             case 'clearall':
-                $this->success('The clearall command was called');
+                $this->alert('Command clearall not realized yet');
                 break;
             default:
                 $this->error('No known command was called, we show the default help instead:');
