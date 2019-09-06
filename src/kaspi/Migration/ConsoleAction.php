@@ -113,7 +113,12 @@ class ConsoleAction
         }
         $pathMigrations = $this->config->getMigrationPath();
         $migrationsFileMap = Utils::migrationMap($pathMigrations);
-
+        if ($migrationsFileMap === $appliedMigrations) {
+            $this->cli->success(sprintf(
+                'All migration applied. Spended time %01.4f seconds', (microtime(true) - $start_one)
+            ));
+            return;
+        }
         // расхождение массива файлов миграций и примененных миграций (лежат в бд)
         $migrationsForApplay = array_diff_assoc($migrationsFileMap, $appliedMigrations);
         if ($migrationVersion && !in_array($migrationVersion, array_values($migrationsForApplay))) {
