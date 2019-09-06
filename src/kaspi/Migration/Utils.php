@@ -14,7 +14,7 @@ class Utils
     {
         $dt = new \DateTime('now', new \DateTimeZone('UTC'));
 
-        return $dt->format(static::DATE_FORMAT);
+        return (int)$dt->format(static::DATE_FORMAT);
     }
 
     public static function camelToSnake(string $input): ?string
