@@ -36,11 +36,13 @@ class KaspiMigrate extends CLI
         $options->registerCommand('create', 'Create new migration');
         $options->registerArgument('name', 'Migration name', true, 'create');
 
-        $options->registerCommand('migrate', 'Run migration');
-        $options->registerArgument('name', 'Migrate to this name, including it.', false, 'migrate');
+        $options->registerCommand('up', 'Run migration');
+        $options->registerArgument('version', 'Migrate to version, including it.', false, 'up');
 
-        $options->registerCommand('rollback', 'Rollback migration');
-        $options->registerArgument('name', 'Rollback migration to this name, including it', false, 'rollback');
+        $options->registerCommand('down', 'Rollback migration');
+        $options->registerArgument('version', 'Rollback migration to version, including it', true, 'down');
+
+        $options->registerCommand('clearall', 'Clear all data from migration');
     }
 
     protected function showMigrations(array $migrationTable)
@@ -55,20 +57,16 @@ class KaspiMigrate extends CLI
             );
         // a line across the whole width
         $result .= str_pad('', $tf->getMaxWidth(), '-') . "\n";
-        $currentBreakPoint = 0;
         foreach ($migrationTable as $row) {
-            if ($row['breakpoint'] === 0) {
-                $currentBreakPoint = $row['breakpoint'];
-            }
             $result .= $tf->format(
                 $colWidth,
                 array(
                     $row['version'],
                     $row['name'],
-                    $row['end_time'],
-                    $currentBreakPoint ? 'DOWN' : 'UP'
+                    $row['update_at'],
+                    $row['status'] ? 'UP' : 'DOWN'
                 ),
-                array(Colors::C_CYAN, Colors::C_YELLOW, Colors::C_LIGHTCYAN, $currentBreakPoint ? Colors::C_RED : Colors::C_GREEN)
+                array(Colors::C_CYAN, Colors::C_YELLOW, Colors::C_LIGHTCYAN, $row['status'] ? Colors::C_GREEN : Colors::C_RED)
             );
             $result .= str_pad('', $tf->getMaxWidth(), '-') . PHP_EOL;
         }
@@ -84,7 +82,7 @@ class KaspiMigrate extends CLI
         } elseif (is_file('config.php')) {
             return require 'config.php';
         }
-        $this->info('Use option --config path/to/config-file.php for loading app config');
+        $this->info('Use option --config path/to/config-file.php for loading application config');
         throw new Exception('Config file not found. Default find config.php in current directory.');
     }
 
@@ -97,33 +95,34 @@ class KaspiMigrate extends CLI
         }
 
         $config = new Config($this->getConfig($options));
-        $this->migrationConsole = new ConsoleAction($config);
+        $this->migrationConsole = new ConsoleAction($config, $this);
 
         switch ($options->getCmd()) {
             case 'init':
-                $this->migrationConsole->init($this);
-                $this->success('The init command was called');
+                $this->migrationConsole->init();
                 break;
             case 'status':
                 print $this->showMigrations($this->migrationConsole->status() ?? []);
                 break;
             case 'create':
-                $this->success('The create command was called');
+                $this->migrationConsole->create($options->getArgs()[0]);
                 break;
-            case 'migrate':
-                $this->success('The migrate command was called');
+            case 'up':
+                $migrationVersion = $options->getArgs()[0] ?? null;
+                $this->migrationConsole->up($migrationVersion);
                 break;
-            case 'rollback':
-                $this->success('The rollback command was called');
+            case 'down':
+                $migrationVersion = $options->getArgs()[0] ?? null;
+                $this->migrationConsole->down($migrationVersion);
+                break;
+            case 'clearall':
+                $this->success('The clearall command was called');
                 break;
             default:
                 $this->error('No known command was called, we show the default help instead:');
                 echo $options->help();
                 exit;
         }
-
-        $this->info('$options->getArgs():');
-        var_dump($options->getArgs());
     }
 }
 

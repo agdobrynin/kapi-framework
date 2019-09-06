@@ -1,8 +1,11 @@
 <?php
+declare(strict_types=1);
+
 namespace kaspi\Migration;
 
 use Kaspi\Config;
 use Kaspi\Db;
+use Kaspi\Migration\MigrationInterface;
 
 class Migration implements MigrationInterface
 {
@@ -23,7 +26,6 @@ class Migration implements MigrationInterface
     public function up(): void
     {
         // TODO: Implement up() method.
-        $this->db->exec('');
     }
 
     /**
