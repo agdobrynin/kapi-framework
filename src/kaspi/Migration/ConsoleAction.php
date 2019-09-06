@@ -5,7 +5,7 @@ namespace Kaspi\Migration;
 
 use Kaspi\{Config, Db};
 use splitbrain\phpcli\{CLI, Colors};
-use function \strtr;
+use function \strtr, \file_put_contents;
 
 class ConsoleAction
 {
@@ -67,7 +67,7 @@ class ConsoleAction
         if (!empty($arrMigration[$className])) {
             throw new MigrationException(sprintf('Migration %s exist. Use other migration name', $className));
         }
-
+        // TODO работать надо с бинарнобезопасным чтением
         $content = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'MigrationTemplate.php');
         // Замна переменных на значения
         $classes = [
@@ -84,6 +84,7 @@ class ConsoleAction
             );
         }
         $file = $pathMigrations . $fileName;
+        // TODO работать надо с бинарнобезопасной записью
         if (file_put_contents($file, $content)) {
             $this->cli->info(sprintf('Create new migration %s and file %s: ', $className, $file));
         } else {
@@ -93,26 +94,25 @@ class ConsoleAction
 
     public function up(?int $migrationVersion): void
     {
-        $start = microtime(true);
         // выполнить миграцию, до включительно
+        $start = microtime(true);
+        $appliedMigrations = $this->takeAppliedMigrations();
+        // чтобы не ехать дальше проверим вдруг уже миграция применена
+        if ($migrationVersion && in_array($migrationVersion, array_values($appliedMigrations))) {
+            throw new MigrationException(sprintf('Migration version %d already applied', $migrationVersion));
+        }
         $pathMigrations = $this->config->getMigrationPath();
         $migrationsFileMap = Utils::migrationMap($pathMigrations);
-        $migratedMap = $this->getMigrated();
-        // когда все миграции уже сделаны
-        if ($migrationsFileMap === $migratedMap) {
-            $this->cli->info('Nothing to migrate. All migrations is done.');
-            return;
-        }
+
         // расхождение массива файлов миграций и примененных миграций (лежат в бд)
-        $migrationsForApplay = array_diff_assoc($migrationsFileMap, $migratedMap);
+        $migrationsForApplay = array_diff_assoc($migrationsFileMap, $appliedMigrations);
         if ($migrationVersion && !in_array($migrationVersion, array_values($migrationsForApplay))) {
             throw new MigrationException(sprintf('Ups! Migration version %d not found', $migrationVersion));
         }
 
         if (!$migrationVersion) {
             end($migrationsFileMap);
-            $lastMigrationName = key($migrationsFileMap);
-            $migrationVersion = $migrationsFileMap[$lastMigrationName];
+            $migrationVersion = $migrationsFileMap[key($migrationsFileMap)];
         }
 
         $this->cli->info(sprintf('Start migrations to version %s', $migrationVersion));
@@ -133,18 +133,10 @@ class ConsoleAction
                 $this->db->rollBack();
                 throw new MigrationException($exception->getMessage());
             }
-            $messageClassName = $this->cli->colors->wrap($className, Colors::C_CYAN);
-            $messageMigrationFile = $this->cli->colors->wrap(
-                sprintf('applied from %s', $migrationFile),
-                Colors::C_YELLOW
-            );
-            $messageSpendTime = $this->cli->colors->wrap(
-                sprintf('Spended time %01.4f seconds', microtime(true) - $start_one),
-                Colors::C_GREEN
-            );
-            $this->cli->success(
-                sprintf('Migration %s %s %s', $messageClassName, $messageMigrationFile, $messageSpendTime)
-            );
+            $this->cli->success(sprintf(
+                'Migration "%s" applied from file "%s" Spended time %01.4f seconds',
+                $className, $migrationFile, (microtime(true) - $start_one)
+            ));
             // Записать созданную миграцию в таблицу
             try {
                 $sqlInsert = 'INSERT INTO ' . $this->tableName . ' (version, name) VALUES (:version, :name)';
@@ -166,20 +158,19 @@ class ConsoleAction
 
     public function down(?int $migrationVersion): void
     {
+        //откатить миграцию до, включительно
         $start = microtime(true);
         if (empty($migrationVersion)) {
             throw new MigrationException(sprintf('Set migration version for rollback'));
         }
-        //откатить миграцию до, включительно
-        $migrationComplited = $this->getMigrated('DESC');
-
-        if (false === in_array($migrationVersion, $migrationComplited, true)) {
+        $appliedMigrations = $this->takeAppliedMigrations('DESC');
+        if (false === in_array($migrationVersion, $appliedMigrations, true)) {
             throw new MigrationException(sprintf('Migration version %s not found', $migrationVersion));
         }
 
         $this->cli->info(sprintf('Start down migrations to version %s', $migrationVersion ?? 'initial stage'));
         $pathMigrations = $this->config->getMigrationPath();
-        foreach ($migrationComplited as $className => $version) {
+        foreach ($appliedMigrations as $className => $version) {
             $start_one = microtime(true);
             $migrationFile = Utils::migrationFileName($version, $className);
             require_once $pathMigrations . DIRECTORY_SEPARATOR . $migrationFile;
@@ -213,7 +204,7 @@ class ConsoleAction
         $this->cli->success(sprintf('Current migration version %s. Spended time %01.4f seconds', $migrationVersion, $timeSpended));
     }
 
-    protected function getMigrated(string $orderBy = 'ASC'): array
+    protected function takeAppliedMigrations(string $orderBy = 'ASC'): array
     {
         $result = [];
         $sql = 'SELECT version, name FROM ' . $this->tableName . ' ORDER BY version ' . $orderBy;
