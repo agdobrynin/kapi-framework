@@ -130,6 +130,7 @@ class ConsoleAction
             /** @var Migration $migration */
             $migration = new $className($this->config);
             // Запускаем миграцию
+            // TODO подумать о транзакциях
             $migration->up();
             $messageClassName = $this->cli->colors->wrap($className, Colors::C_CYAN);
             $messageMigrationFile = $this->cli->colors->wrap(
@@ -164,6 +165,7 @@ class ConsoleAction
 
     public function down(?int $migrationVersion): void
     {
+        $start = microtime(true);
         if (empty($migrationVersion)) {
             throw new MigrationException(sprintf('Set migration version for rollback'));
         }
@@ -177,11 +179,13 @@ class ConsoleAction
         $this->cli->info(sprintf('Start down migrations to version %s', $migrationVersion ?? 'initial stage'));
         $pathMigrations = $this->config->getMigrationPath();
         foreach ($migrationComplited as $className => $version) {
+            $start_one = microtime(true);
             $migrationFile = Utils::migrationFileName($version, $className);
             require_once $pathMigrations . DIRECTORY_SEPARATOR . $migrationFile;
             /** @var Migration $migration */
             $migration = new $className($this->config);
             // Запускаем миграцию
+            // TODO подумать о транзакциях
             $migration->down();
             // Удалить миграцию из таблицы
             try {
@@ -191,12 +195,14 @@ class ConsoleAction
             } catch (\PDOException $exception) {
                 throw new MigrationException($exception->getMessage() . PHP_EOL . $sqlDelete);
             }
-            $this->cli->success(sprintf('Migration %s down from file %s', $className, $migrationFile));
+            $spendedTime = microtime(true) - $start_one;
+            $this->cli->success(sprintf('Migration %s down from file %s. Spended time %01.4f seconds', $className, $migrationFile, $spendedTime));
             if ($migrationVersion === (int)$version) {
                 break;
             }
         }
-        $this->cli->success(sprintf('Current migration version %s', $migrationVersion));
+        $timeSpended = microtime(true) - $start;
+        $this->cli->success(sprintf('Current migration version %s. Spended time %01.4f seconds', $migrationVersion, $timeSpended));
     }
 
     protected function getMigrated(string $orderBy = 'ASC'): array
