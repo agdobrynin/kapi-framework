@@ -7,7 +7,7 @@ use Kaspi\Config;
 use Kaspi\Db;
 use Kaspi\Migration\MigrationInterface;
 
-class Migration implements MigrationInterface
+abstract class Migration implements MigrationInterface
 {
     /** @var Config  */
     private $config;
@@ -21,21 +21,5 @@ class Migration implements MigrationInterface
         $this->config = $config;
         $this->db = Db::getInstance($config);
         $this->pdoDriver = $this->db->getAttribute(\PDO::ATTR_DRIVER_NAME);
-    }
-
-    /**
-     * скрипт внесения миграции
-     */
-    public function up(): void
-    {
-        // TODO: Implement up() method.
-    }
-
-    /**
-     * скрипт удаления миграции
-     */
-    public function down(): void
-    {
-        // TODO: Implement down() method.
     }
 }
