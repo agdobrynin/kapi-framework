@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace kaspi\Migration;
@@ -14,14 +15,15 @@ class Utils
     {
         $dt = new \DateTime('now', new \DateTimeZone('UTC'));
 
-        return (int)$dt->format(static::DATE_FORMAT);
+        return (int) $dt->format(static::DATE_FORMAT);
     }
 
     public static function camelToSnake(string $input): ?string
     {
         $r = strtolower(preg_replace_callback('/([a-z])([A-Z])/', function ($a) {
-            return $a[1] . "_" . strtolower($a[2]);
+            return $a[1].'_'.strtolower($a[2]);
         }, $input));
+
         return $r;
     }
 
@@ -37,13 +39,14 @@ class Utils
             throw new MigrationException(sprintf('Path %s to migrations directory not found. Use init command', $path));
         }
         $classNames = [];
-        $phpFiles = glob($path . DIRECTORY_SEPARATOR . '*.php');
+        $phpFiles = glob($path.DIRECTORY_SEPARATOR.'*.php');
         foreach ($phpFiles as $filePath) {
             if (1 === preg_match(self::MIGRATION_FILE_NAME_PATTERN, basename($filePath), $matches)) {
-                $classNames[self::snakeToCamel($matches['name'])] = (int)$matches['version'];
+                $classNames[self::snakeToCamel($matches['name'])] = (int) $matches['version'];
             }
         }
         asort($classNames);
+
         return $classNames;
     }
 
@@ -53,6 +56,7 @@ class Utils
         if (1 === preg_match(self::MIGRATION_FILE_NAME_PATTERN, $fileClassName, $matches)) {
             return $fileClassName;
         }
+
         return null;
     }
 
@@ -61,6 +65,7 @@ class Utils
         if (1 === preg_match(self::CLASS_NAME_PATTERN, $name)) {
             return self::snakeToCamel($name);
         }
+
         return null;
     }
 }

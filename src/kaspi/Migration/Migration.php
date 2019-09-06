@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace kaspi\Migration;
@@ -9,7 +10,7 @@ use Kaspi\Migration\MigrationInterface;
 
 abstract class Migration implements MigrationInterface
 {
-    /** @var Config  */
+    /** @var Config */
     private $config;
     /** @var \PDO Работа с SQL как со стандартным PDO драйвером! */
     protected $db;
