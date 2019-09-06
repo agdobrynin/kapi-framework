@@ -14,7 +14,6 @@ class ConsoleAction
 {
     private $config;
     private $db;
-    private $pdoAdapter;
     private $tableName = 'migrations';
     private const SQLITE_ADAPTER = 'sqlite';
     private $cli;
@@ -23,7 +22,6 @@ class ConsoleAction
     {
         $this->config = $config;
         $this->db = Db::getInstance($config);
-        $this->pdoAdapter = $this->db->getAttribute(\PDO::ATTR_DRIVER_NAME);
         if ($table = $this->config->getMigrationTable()) {
             $this->tableName = $table;
         }
