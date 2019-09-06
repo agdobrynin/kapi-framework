@@ -115,7 +115,7 @@ class ConsoleAction
         $migrationsFileMap = Utils::migrationMap($pathMigrations);
         if ($migrationsFileMap === $appliedMigrations) {
             $this->cli->success(sprintf(
-                'All migration applied. Spended time %01.4f seconds', (microtime(true) - $start_one)
+                'All migration applied. Spended time %01.4f seconds', (microtime(true) - $start)
             ));
             return;
         }
