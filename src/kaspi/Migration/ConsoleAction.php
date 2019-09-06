@@ -128,8 +128,15 @@ class ConsoleAction
             /** @var Migration $migration */
             $migration = new $className($this->config);
             // Запускаем миграцию
-            // TODO подумать о транзакциях
-            $migration->up();
+            try {
+                $this->db->beginTransaction();
+                // запуск самой миграции
+                $migration->up();
+                $this->db->commit();
+            } catch (PDOException $exception) {
+                $this->db->rollBack();
+                throw new MigrationException($exception->getMessage());
+            }
             $messageClassName = $this->cli->colors->wrap($className, Colors::C_CYAN);
             $messageMigrationFile = $this->cli->colors->wrap(
                 sprintf('applied from %s', $migrationFile),
@@ -183,8 +190,15 @@ class ConsoleAction
             /** @var Migration $migration */
             $migration = new $className($this->config);
             // Запускаем миграцию
-            // TODO подумать о транзакциях
-            $migration->down();
+            try {
+                $this->db->beginTransaction();
+                // запуск самой миграции
+                $migration->down();
+                $this->db->commit();
+            } catch (PDOException $exception) {
+                $this->db->rollBack();
+                throw new MigrationException($exception->getMessage());
+            }
             // Удалить миграцию из таблицы
             try {
                 $sqlDelete = 'DELETE FROM ' . $this->tableName . ' WHERE version = :version';
