@@ -96,7 +96,7 @@ class KaspiMigrate extends CLI
 
         $config = new Config($this->getConfig($options));
         $this->migrationConsole = new ConsoleAction($config, $this);
-
+        $this->info(sprintf('Current PDO driver: %s', $this->migrationConsole->getPdoDriverName()));
         switch ($options->getCmd()) {
             case 'init':
                 $this->migrationConsole->init();

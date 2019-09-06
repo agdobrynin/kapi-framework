@@ -13,6 +13,7 @@ class ConsoleAction
     private $db;
     private $tableName = 'migrations';
     private $cli;
+    private $pdoDriver;
 
     public function __construct(Config $config, CLI $cli)
     {
@@ -21,7 +22,13 @@ class ConsoleAction
         if ($table = $this->config->getMigrationTable()) {
             $this->tableName = $table;
         }
+        $this->pdoDriver = $this->db->getAttribute(\PDO::ATTR_DRIVER_NAME);
         $this->cli = $cli;
+    }
+
+    public function getPdoDriverName(): string
+    {
+        return $this->pdoDriver;
     }
 
     public function init(): void
