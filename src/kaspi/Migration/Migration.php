@@ -13,11 +13,14 @@ class Migration implements MigrationInterface
     private $config;
     /** @var \PDO Работа с SQL как со стандартным PDO драйвером! */
     protected $db;
+    /** @var string текущий драйвер PDO (mysql, sqlite, ...) */
+    protected $pdoDriver;
 
     public function __construct(Config $config)
     {
         $this->config = $config;
         $this->db = Db::getInstance($config);
+        $this->pdoDriver = $this->db->getAttribute(\PDO::ATTR_DRIVER_NAME);
     }
 
     /**
