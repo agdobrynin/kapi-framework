@@ -3,11 +3,8 @@ declare(strict_types=1);
 
 namespace Kaspi\Migration;
 
-use Kaspi\Config;
-use Kaspi\Db;
-use splitbrain\phpcli\CLI;
-use splitbrain\phpcli\Colors;
-
+use Kaspi\{Config, Db};
+use splitbrain\phpcli\{CLI, Colors};
 use function \strtr;
 
 class ConsoleAction
@@ -15,7 +12,6 @@ class ConsoleAction
     private $config;
     private $db;
     private $tableName = 'migrations';
-    private const SQLITE_ADAPTER = 'sqlite';
     private $cli;
 
     public function __construct(Config $config, CLI $cli)
