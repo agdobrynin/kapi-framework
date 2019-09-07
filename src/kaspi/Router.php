@@ -49,9 +49,23 @@ final class Router
     {
         $key = array_search($routeName, array_column($this->routes, self::ROUTE_NAME), true);
         if (false !== $key) {
-            // TODO так как возвращается pattern роутера, то там могут быть regex выражения, подуймай как их менять!
-            // (?<word>\w+) , (?<id>\d+), (?<zip>([0-9]{6})), (?<isbn>([a-z]{3})-([0-9]{4,6})-([a-z]{3,}))
-            return $this->routes[$key][self::ROUTE_PATTERN];
+            if (is_array($args)) {
+                // шаблон роута может содержать сложные выражения
+                // (?<word>\w+) , (?<id>\d+), (?<zip>([0-9]{6})), (?<isbn>([a-z]{3})-([0-9]{4,6})-([a-z]{3,}))
+                $pattern = $this->routes[$key][self::ROUTE_PATTERN];
+                $route = $pattern;
+                preg_replace_callback('@\(?<([^<]+)?\)@', static function ($matches) use ($args, &$route, $routeName) {
+                    if (1 === preg_match('@\<([^>]*)>@i', $matches[0],$expr)) {
+                        if (false === isset($args[$expr[1]])) {
+                            throw new RouterException(sprintf('Undefined parameter "%s" for route name "%s"', $expr[1], $routeName));
+                        }
+                        $route = str_replace('(?'.$matches[0], $args[$expr[1]], $route);
+                    }
+                }, $pattern);
+            } else {
+                $route = $this->routes[$key][self::ROUTE_PATTERN];
+            }
+            return $route;
         }
 
         return null;
