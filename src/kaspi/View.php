@@ -78,7 +78,7 @@ class View
             if (count($arg)) {
                 return $func(...$arg);
             } else {
-                return $func;
+                return $func();
             }
         }
 
