@@ -66,6 +66,24 @@ abstract class Entity
         return $collection->getCollection()[0] ?? $entity;
     }
 
+    /**
+     * @param string $fieldName
+     * @param $value
+     *
+     * @return array|null Entity[]
+     * @throws OrmException
+     */
+    public static function findBy(string $fieldName, $value): ?array
+    {
+        $class = static::class;
+        /** @var Entity $entity */
+        $entity = new $class();
+        $collection = (new Collection($entity))
+            ->addFilter((new Filter())->add($fieldName, $value));
+
+        return $collection->getCollection();
+    }
+
     public static function first(): Entity
     {
         $class = static::class;
