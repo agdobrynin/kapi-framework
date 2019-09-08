@@ -48,6 +48,21 @@ abstract class Entity
         return $this->fields;
     }
 
+    private static function findOneByField(?string $fieldName = null, $value = null, $orderType = 'ASC')
+    {
+        $class = static::class;
+        /** @var Entity $entity */
+        $entity = new $class();
+        $collection = (new Collection($entity));
+        if ($fieldName) {
+            $collection->addFilter((new Filter())->add($fieldName, $value));
+        }
+        $collection->addOrder((new Order())->add($entity->getPrimaryKey(), $orderType))
+            ->addLimit(new Limit(1, 1));
+
+        return $collection->getCollection()[0] ?? $entity;
+    }
+
     /**
      * @param mixed $id Entity's primary key
      *
@@ -55,57 +70,29 @@ abstract class Entity
      */
     public static function find($id): Entity
     {
-        $class = static::class;
-        /** @var Entity $entity */
-        $entity = new $class();
-        $collection = (new Collection($entity))
-            ->addFilter((new Filter())->add($entity->getPrimaryKey(), $id))
-            ->addOrder((new Order())->add($entity->getPrimaryKey(), 'ASC'))
-            ->addLimit(new Limit(1, 1));
-
-        return $collection->getCollection()[0] ?? $entity;
+        return self::findOneByField($entity->getPrimaryKey(), $id);
     }
 
     /**
      * @param string $fieldName
      * @param $value
      *
-     * @return array|null Entity[]
+     * @return Entity
      * @throws OrmException
      */
-    public static function findBy(string $fieldName, $value): ?array
+    public static function findBy(string $fieldName, $value): Entity
     {
-        $class = static::class;
-        /** @var Entity $entity */
-        $entity = new $class();
-        $collection = (new Collection($entity))
-            ->addFilter((new Filter())->add($fieldName, $value));
-
-        return $collection->getCollection();
+        return self::findOneByField($fieldName, $value);
     }
 
     public static function first(): Entity
     {
-        $class = static::class;
-        /** @var Entity $entity */
-        $entity = new $class();
-        $collection = (new Collection($entity))
-            ->addOrder((new Order())->add($entity->getPrimaryKey(), 'ASC'))
-            ->addLimit(new Limit(1, 1));
-
-        return $collection->getCollection()[0] ?? $entity;
+        return self::findOneByField();
     }
 
     public static function last(): Entity
     {
-        $class = static::class;
-        /** @var Entity $entity */
-        $entity = new $class();
-        $collection = (new Collection($entity))
-            ->addOrder((new Order())->add($entity->getPrimaryKey(), 'DESC'))
-            ->addLimit(new Limit(1, 1));
-
-        return $collection->getCollection()[0] ?? $entity;
+        return self::findOneByField(null, null, 'DESC');
     }
 
     /**
@@ -133,7 +120,7 @@ abstract class Entity
     {
         // имя таблицы во множественном числе + s если не опеделено в классе
         if (empty($this->table)) {
-            $this->table = strtolower($this->getEntityClass()->getShortName()).'s';
+            $this->table = strtolower($this->getEntityClass()->getShortName()) . 's';
         }
 
         return $this->table;
