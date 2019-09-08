@@ -68,7 +68,7 @@ class Collection
     /**
      * @throws OrmException
      */
-    public function get(): self
+    public function prepare(): self
     {
         $this->pdoStatement = $this->entity->getEntityBuilder()->select(
             $this->filter,
