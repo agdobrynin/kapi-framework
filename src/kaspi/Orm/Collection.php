@@ -80,6 +80,22 @@ class Collection
         return $this;
     }
 
+    /**
+     * Get result of collection
+     * @return \Iterator
+     */
+    public function get(): \Iterator
+    {
+        $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, get_class($this->entity));
+        while($record = $this->pdoStatement->fetch()) {
+            yield $record;
+        }
+    }
+
+    /**
+     * Please use Collection::get for many result rows - it more effective, use Iterator through 'yield'
+     * @return array
+     */
     public function fetchAll(): array
     {
         return $this->entity->getEntityBuilder()->fetchAll($this->pdoStatement);
