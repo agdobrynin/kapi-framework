@@ -185,10 +185,10 @@ EOF;
         } finally {
             $requestTimeFloat = (float) str_replace(',', '.', $this->request->getEnv('REQUEST_TIME_FLOAT'));
             if ($time = (microtime(true) - $requestTimeFloat)) {
-                $this->response->setHeader('X-Generation-time', $time);
+                $this->response->setHeader('X-ksapi-execution-second', round($time, 5));
             }
-            $this->response->setHeader('X-memory-usage-kByte', round(memory_get_usage() / 1024));
-            $this->response->setHeader('X-memory-peak-usage-kByte', round(memory_get_peak_usage() / 1024));
+            $this->response->setHeader('X-ksapi-memory-usage-kByte', round(memory_get_usage() / 1024));
+            $this->response->setHeader('X-ksapi-memory-peak-usage-kByte', round(memory_get_peak_usage() / 1024));
             echo $this->response->emit();
         }
     }
