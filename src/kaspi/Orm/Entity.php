@@ -58,7 +58,7 @@ abstract class Entity
         $collection->addOrder((new Order())->add($entity->getPrimaryKey(), $orderType));
         $collection->addLimit(new Limit(1, 1));
 
-        return $collection->prepare()->fetch();
+        return $collection->prepare()->getEntity();
     }
 
     /**

@@ -84,7 +84,7 @@ class Collection
      * Get result of collection
      * @return \Iterator
      */
-    public function get(): \Iterator
+    public function getEntities(): \Iterator
     {
         $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, get_class($this->entity));
         while($record = $this->pdoStatement->fetch()) {
@@ -96,12 +96,12 @@ class Collection
      * Please use Collection::get for many result rows - it more effective, use Iterator through 'yield'
      * @return array
      */
-    public function fetchAll(): array
+    public function fetchArray(): array
     {
         return $this->entity->getEntityBuilder()->fetchAll($this->pdoStatement);
     }
 
-    public function fetch(): Entity
+    public function getEntity(): Entity
     {
         return $this->entity->getEntityBuilder()->fetch($this->pdoStatement);
     }
