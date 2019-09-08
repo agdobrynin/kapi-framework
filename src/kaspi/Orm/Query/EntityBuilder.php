@@ -14,8 +14,6 @@ final class EntityBuilder
 
     /** @var bool использовать транзации при операциях PDOStatement::execute */
     public $useTransaction = true;
-    /** @var string текущий sql запрос */
-    private $sql;
 
     public function __construct(Entity $entity)
     {
@@ -100,6 +98,7 @@ final class EntityBuilder
      */
     public function truncate(): int
     {
+        // TODO подумать о разных диалектах очистки таблицы, например для mysql
         $sql = 'DELETE FROM '.$this->entity->getTable();
         $sth = $this->execute($sql, [], $execResult);
         if ($this->useTransaction) {
@@ -110,7 +109,7 @@ final class EntityBuilder
     }
 
     /**
-     * @return array Entity[]
+     * @return \PDOStatement
      *
      * @throws OrmException
      */
@@ -207,8 +206,13 @@ final class EntityBuilder
     private function checkPrimaryKey(): void
     {
         if (empty($this->entity->id)) {
-            throw new OrmException('Entity for table '.$this->entity->getPrimaryKey().
-                ' have empty primary key '.$this->entity->getPrimaryKey());
+            throw new OrmException(
+                sprintf(
+                    'Entity for table %s have empty primary key %s',
+                    $this->entity->getTable(),
+                    $this->entity->getPrimaryKey()
+                )
+            );
         }
     }
 }
