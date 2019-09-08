@@ -48,13 +48,10 @@ abstract class Entity
         return $this->fields;
     }
 
-    private static function findOneByField(?string $fieldName = null, $value = null, $orderType = 'ASC')
+    private static function findOneByField(Entity $entity, ?string $fieldName = null, $value = null, $orderType = 'ASC')
     {
-        $class = static::class;
-        /** @var Entity $entity */
-        $entity = new $class();
         $collection = (new Collection($entity));
-        if (null === $value) {
+        if ($fieldName !== null || $value !== null) {
             $fieldName = $fieldName?: $entity->getPrimaryKey();
             $collection->addFilter((new Filter())->add($fieldName, $value));
         }
@@ -71,7 +68,10 @@ abstract class Entity
      */
     public static function find($id): Entity
     {
-        return self::findOneByField(null, $id?:null);
+        $class = static::class;
+        /** @var Entity $entity */
+        $entity = new $class();
+        return self::findOneByField($entity, $entity->getPrimaryKey(),$id?:null);
     }
 
     /**
@@ -83,17 +83,29 @@ abstract class Entity
      */
     public static function findBy(string $fieldName, $value): Entity
     {
-        return self::findOneByField($fieldName, $value);
+        $class = static::class;
+        /** @var Entity $entity */
+        $entity = new $class();
+        if (!in_array($fieldName, $entity->getProperties())) {
+            throw new OrmException(sprintf('Entity do not have property %s', $fieldName));
+        }
+        return self::findOneByField($entity, $fieldName, $value);
     }
 
     public static function first(): Entity
     {
-        return self::findOneByField();
+        $class = static::class;
+        /** @var Entity $entity */
+        $entity = new $class();
+        return self::findOneByField($entity);
     }
 
     public static function last(): Entity
     {
-        return self::findOneByField(null, null, 'DESC');
+        $class = static::class;
+        /** @var Entity $entity */
+        $entity = new $class();
+        return self::findOneByField($entity, null, null, 'DESC');
     }
 
     /**
