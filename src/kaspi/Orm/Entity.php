@@ -54,11 +54,12 @@ abstract class Entity
         /** @var Entity $entity */
         $entity = new $class();
         $collection = (new Collection($entity));
-        if ($fieldName) {
+        if (null === $value) {
+            $fieldName = $fieldName?: $entity->getPrimaryKey();
             $collection->addFilter((new Filter())->add($fieldName, $value));
         }
-        $collection->addOrder((new Order())->add($entity->getPrimaryKey(), $orderType))
-            ->addLimit(new Limit(1, 1));
+        $collection->addOrder((new Order())->add($entity->getPrimaryKey(), $orderType));
+        $collection->addLimit(new Limit(1, 1));
 
         return $collection->getCollection()[0] ?? $entity;
     }
@@ -70,7 +71,7 @@ abstract class Entity
      */
     public static function find($id): Entity
     {
-        return self::findOneByField($entity->getPrimaryKey(), $id);
+        return self::findOneByField(null, $id?:null);
     }
 
     /**
