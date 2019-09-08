@@ -120,7 +120,7 @@ final class EntityBuilder
         ?Group $group = null,
         ?Having $having = null,
         ?Limit $limit = null
-    ): array {
+    ): \PDOStatement {
         $paramsData = new ParamsData($this->entity->getEntityDataParams());
         $format = 'SELECT %s, %s FROM %s';
         $sql = sprintf($format, $this->entity->getPrimaryKey(), $paramsData->getFields(), $this->entity->getTable());
@@ -142,14 +142,18 @@ final class EntityBuilder
         if ($limit && $strLimit = (string) $limit) {
             $sql .= ' '.$strLimit;
         }
+        return $this->execute($sql, $stmData);
+    }
 
-        $prevTransactionState = $this->useTransaction;
-        $this->useTransaction = false;
-        $sth = $this->execute($sql, $stmData);
-        $result = $sth->fetchAll(\PDO::FETCH_CLASS, get_class($this->entity)) ?: [];
-        $this->useTransaction = $prevTransactionState;
+    public function fetchAll(\PDOStatement $sth): array
+    {
+        return $sth->fetchAll(\PDO::FETCH_CLASS, get_class($this->entity)) ?: [];
+    }
 
-        return $result;
+    public function fetch(\PDOStatement $sth): Entity
+    {
+        $sth->setFetchMode(\PDO::FETCH_CLASS, get_class($this->entity));
+        return $sth->fetch() ?: $this->entity;
     }
 
     /**
@@ -170,9 +174,6 @@ final class EntityBuilder
         $stmData = $filter ? $filter->makeStmData() : [];
         $sth = $this->execute($sql, $stmData);
         $result = $sth->fetch(\PDO::FETCH_NUM)[0] ?? 0;
-        if ($this->useTransaction) {
-            self::getPdo()->commit();
-        }
 
         return $result;
     }
@@ -183,8 +184,9 @@ final class EntityBuilder
     private function execute(string $sql, array $inputParameters, ?bool &$execResult = null): \PDOStatement
     {
         // TODO придумай как обрабатывать ошибки
+        $isSelect = 0 === stripos($sql, 'select ');
         try {
-            if ($this->useTransaction) {
+            if ($isSelect === false && $this->useTransaction) {
                 self::getPdo()->beginTransaction();
             }
             $sth = self::getPdo()->prepare($sql);
@@ -192,7 +194,7 @@ final class EntityBuilder
 
             return $sth;
         } catch (\PDOException $exception) {
-            if ($this->useTransaction) {
+            if ($isSelect === false && $this->useTransaction) {
                 self::getPdo()->rollBack();
             }
             throw new OrmException($exception->getMessage().PHP_EOL.$sql);

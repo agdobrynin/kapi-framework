@@ -10,7 +10,8 @@ use Kaspi\Orm\Query\Order;
 
 class Collection
 {
-    protected $collection = [];
+    /** @var \PDOStatement */
+    protected $pdoStatement;
     /** @var Entity */
     protected $entity;
     /** @var Filter */
@@ -67,15 +68,26 @@ class Collection
     /**
      * @throws OrmException
      */
-    public function getCollection(): array
+    public function get(): self
     {
-        return $this->entity->getEntityBuilder()->select(
+        $this->pdoStatement = $this->entity->getEntityBuilder()->select(
             $this->filter,
             $this->order,
             $this->group,
             $this->having,
             $this->limit
         );
+        return $this;
+    }
+
+    public function fetchAll(): array
+    {
+        return $this->entity->getEntityBuilder()->fetchAll($this->pdoStatement);
+    }
+
+    public function fetch(): Entity
+    {
+        return $this->entity->getEntityBuilder()->fetch($this->pdoStatement);
     }
 
     /**

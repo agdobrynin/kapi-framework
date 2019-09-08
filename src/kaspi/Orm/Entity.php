@@ -48,7 +48,7 @@ abstract class Entity
         return $this->fields;
     }
 
-    private static function findOneByField(Entity $entity, ?string $fieldName = null, $value = null, $orderType = 'ASC')
+    private static function findOneByField(Entity $entity, ?string $fieldName = null, $value = null, $orderType = 'ASC'): Entity
     {
         $collection = (new Collection($entity));
         if ($fieldName !== null || $value !== null) {
@@ -58,7 +58,7 @@ abstract class Entity
         $collection->addOrder((new Order())->add($entity->getPrimaryKey(), $orderType));
         $collection->addLimit(new Limit(1, 1));
 
-        return $collection->getCollection()[0] ?? $entity;
+        return $collection->get()->fetch();
     }
 
     /**
