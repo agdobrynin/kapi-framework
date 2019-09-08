@@ -143,11 +143,11 @@ final class EntityBuilder
             $sql .= ' '.$strLimit;
         }
 
+        $prevTransactionState = $this->useTransaction;
+        $this->useTransaction = false;
         $sth = $this->execute($sql, $stmData);
         $result = $sth->fetchAll(\PDO::FETCH_CLASS, get_class($this->entity)) ?: [];
-        if ($this->useTransaction) {
-            self::getPdo()->commit();
-        }
+        $this->useTransaction = $prevTransactionState;
 
         return $result;
     }
@@ -192,7 +192,9 @@ final class EntityBuilder
 
             return $sth;
         } catch (\PDOException $exception) {
-            self::getPdo()->rollBack();
+            if ($this->useTransaction) {
+                self::getPdo()->rollBack();
+            }
             throw new OrmException($exception->getMessage().PHP_EOL.$sql);
         }
     }
