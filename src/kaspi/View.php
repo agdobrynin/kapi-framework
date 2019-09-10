@@ -95,11 +95,16 @@ class View
         $this->globalData[$key] = $data;
     }
 
-    public function include(string $fileName, array $data = []): void
+    public function include(string $template, array $data = []): void
     {
-        $data = array_merge($data, $this->globalData);
-        extract($data, EXTR_OVERWRITE);
-        include $this->viewPath.$fileName;
+        $template = realpath($this->viewPath.$template.($this->useExtension ? '' : '.php'));
+        if (file_exists($template)) {
+            $data = array_merge($data, $this->globalData);
+            extract($data, EXTR_OVERWRITE);
+            include $template;
+            return;
+        }
+        throw new ViewException('Include template does not exist: '.$template);
     }
 
     /**
