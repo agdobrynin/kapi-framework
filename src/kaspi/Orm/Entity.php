@@ -62,34 +62,25 @@ abstract class Entity
     }
 
     /**
-     * @param mixed $id Entity's primary key
+     * @param mixed $param Entity's primary key or array with pair fieldName=>value
      *
      * @throws OrmException
      */
-    public static function find($id): Entity
+    public static function find($param): Entity
     {
         $class = static::class;
         /** @var Entity $entity */
         $entity = new $class();
-        return self::findOneByField($entity, $entity->getPrimaryKey(),$id?:null);
-    }
-
-    /**
-     * @param string $fieldName
-     * @param $value
-     *
-     * @return Entity
-     * @throws OrmException
-     */
-    public static function findBy(string $fieldName, $value): Entity
-    {
-        $class = static::class;
-        /** @var Entity $entity */
-        $entity = new $class();
+        if (is_array($param)) {
+            list($fieldName, $value) = $param;
+        } else {
+            $fieldName = $entity->getPrimaryKey();
+            $value = $param;
+        }
         if (!in_array($fieldName, $entity->getProperties())) {
             throw new OrmException(sprintf('Entity do not have property %s', $fieldName));
         }
-        return self::findOneByField($entity, $fieldName, $value);
+        return self::findOneByField($entity, $fieldName, $value ?: null);
     }
 
     public static function first(): Entity
