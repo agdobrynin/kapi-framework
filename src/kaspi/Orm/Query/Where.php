@@ -2,7 +2,7 @@
 
 namespace Kaspi\Orm\Query;
 
-class Filter
+class Where
 {
     public const COMPARE_EQUAL = '=';
     public const COMPARE_LIKE = 'LIKE';
@@ -15,7 +15,7 @@ class Filter
     // при формировании sql убирать value и из массива значений  stm
     public const COMPARE_IS_NOT_NULL = 'IS NOT NULL';
 
-    protected $arrFilters = [];
+    protected $arrWhere = [];
 
     /**
      * @param string      $field     поле по которому строим условие
@@ -23,7 +23,7 @@ class Filter
      * @param string|null $compare   оператор условия (>,<, IS NULL ...)
      * @param string|null $condition условие связывания этого стравнения к другим (AND, OR)
      *
-     * @return Filter
+     * @return Where
      */
     public function add(
         string $field,
@@ -34,7 +34,7 @@ class Filter
         if (!empty($field)) {
             $compare = $compare ?: self::COMPARE_EQUAL;
             $prefix = uniqid('', false).'_';
-            $this->arrFilters[] = [
+            $this->arrWhere[] = [
                 'exp' => "{$field} {$compare} :{$prefix}{$field}",
                 'cond' => $condition ?: Condition::CONDITION_AND,
                 'param' => ":{$prefix}{$field}",
@@ -67,17 +67,17 @@ class Filter
 
     public function unset(): void
     {
-        $this->arrFilters = [];
+        $this->arrWhere = [];
     }
 
     public function __toString(): string
     {
         $result = '';
-        foreach ($this->arrFilters as $index => $filter) {
+        foreach ($this->arrWhere as $index => $where) {
             if (0 === $index) {
-                $result .= $filter['exp'];
+                $result .= $where['exp'];
             } else {
-                $result .= ' '.$filter['cond'].' '.$filter['exp'];
+                $result .= ' '.$where['cond'].' '.$where['exp'];
             }
         }
 
@@ -87,8 +87,8 @@ class Filter
     public function makeStmData(): array
     {
         $result = [];
-        foreach ($this->arrFilters as $index => $filter) {
-            $result[$filter['param']] = $filter['value'];
+        foreach ($this->arrWhere as $index => $where) {
+            $result[$where['param']] = $where['value'];
         }
 
         return $result;

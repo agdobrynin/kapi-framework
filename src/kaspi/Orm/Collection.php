@@ -2,11 +2,11 @@
 
 namespace Kaspi\Orm;
 
-use Kaspi\Orm\Query\Filter;
 use Kaspi\Orm\Query\Group;
 use Kaspi\Orm\Query\Having;
 use Kaspi\Orm\Query\Limit;
 use Kaspi\Orm\Query\Order;
+use Kaspi\Orm\Query\Where;
 
 class Collection
 {
@@ -14,8 +14,8 @@ class Collection
     protected $pdoStatement;
     /** @var Entity */
     protected $entity;
-    /** @var Filter */
-    protected $filter;
+    /** @var Where */
+    protected $where;
     /** @var Order */
     protected $order;
     /** @var Group */
@@ -30,35 +30,35 @@ class Collection
         $this->entity = $entity;
     }
 
-    public function addFilter(Filter $filter): self
+    public function where(Where $where): self
     {
-        $this->filter = $filter;
+        $this->where = $where;
 
         return $this;
     }
 
-    public function addLimit(Limit $limit): self
+    public function limit(Limit $limit): self
     {
         $this->limit = $limit;
 
         return $this;
     }
 
-    public function addOrder(Order $order): self
+    public function order(Order $order): self
     {
         $this->order = $order;
 
         return $this;
     }
 
-    public function addGroup(Group $group): self
+    public function group(Group $group): self
     {
         $this->group = $group;
 
         return $this;
     }
 
-    public function addHaving(Having $having): self
+    public function having(Having $having): self
     {
         $this->having = $having;
 
@@ -71,30 +71,29 @@ class Collection
     public function prepare(): self
     {
         $this->pdoStatement = $this->entity->getEntityBuilder()->select(
-            $this->filter,
+            $this->where,
             $this->order,
             $this->group,
             $this->having,
             $this->limit
         );
+
         return $this;
     }
 
     /**
-     * Get result of collection
-     * @return \Iterator
+     * Get result of collection.
      */
     public function getEntities(): \Iterator
     {
         $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, get_class($this->entity));
-        while($record = $this->pdoStatement->fetch()) {
+        while ($record = $this->pdoStatement->fetch()) {
             yield $record;
         }
     }
 
     /**
-     * Please use Collection::get for many result rows - it more effective, use Iterator through 'yield'
-     * @return array
+     * Please use Collection::get for many result rows - it more effective, use Iterator through 'yield'.
      */
     public function getArray(): array
     {
@@ -112,7 +111,7 @@ class Collection
     public function count(): int
     {
         return $this->entity->getEntityBuilder()->count(
-            $this->filter,
+            $this->where,
             $this->group
         );
     }

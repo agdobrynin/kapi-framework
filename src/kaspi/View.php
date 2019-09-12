@@ -102,6 +102,7 @@ class View
             $data = array_merge($data, $this->globalData);
             extract($data, EXTR_OVERWRITE);
             include $template;
+
             return;
         }
         throw new ViewException('Include template does not exist: '.$template);

@@ -55,7 +55,7 @@ final class Router
                 $pattern = $this->routes[$key][self::ROUTE_PATTERN];
                 $route = $pattern;
                 preg_replace_callback('@\(?<([^<]+)?\)@', static function ($matches) use ($args, &$route, $routeName) {
-                    if (1 === preg_match('@\<([^>]*)>@i', $matches[0],$expr)) {
+                    if (1 === preg_match('@\<([^>]*)>@i', $matches[0], $expr)) {
                         if (false === isset($args[$expr[1]])) {
                             throw new RouterException(sprintf('Undefined parameter "%s" for route name "%s"', $expr[1], $routeName));
                         }
@@ -65,6 +65,7 @@ final class Router
             } else {
                 $route = $this->routes[$key][self::ROUTE_PATTERN];
             }
+
             return $route;
         }
 

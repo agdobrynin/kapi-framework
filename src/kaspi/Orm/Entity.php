@@ -3,9 +3,9 @@
 namespace Kaspi\Orm;
 
 use Kaspi\Orm\Query\EntityBuilder;
-use Kaspi\Orm\Query\Filter;
 use Kaspi\Orm\Query\Limit;
 use Kaspi\Orm\Query\Order;
+use Kaspi\Orm\Query\Where;
 use ReflectionClass;
 use ReflectionProperty;
 
@@ -51,12 +51,12 @@ abstract class Entity
     private static function findOneByField(Entity $entity, ?string $fieldName = null, $value = null, $orderType = 'ASC'): Entity
     {
         $collection = (new Collection($entity));
-        if ($fieldName !== null || $value !== null) {
-            $fieldName = $fieldName?: $entity->getPrimaryKey();
-            $collection->addFilter((new Filter())->add($fieldName, $value));
+        if (null !== $fieldName || null !== $value) {
+            $fieldName = $fieldName ?: $entity->getPrimaryKey();
+            $collection->where((new Where())->add($fieldName, $value));
         }
-        $collection->addOrder((new Order())->add($entity->getPrimaryKey(), $orderType));
-        $collection->addLimit(new Limit(1, 1));
+        $collection->order((new Order())->add($entity->getPrimaryKey(), $orderType));
+        $collection->limit(new Limit(1, 1));
 
         return $collection->prepare()->getEntity();
     }
@@ -72,7 +72,7 @@ abstract class Entity
         /** @var Entity $entity */
         $entity = new $class();
         if (is_array($param)) {
-            list($fieldName, $value) = $param;
+            [$fieldName, $value] = $param;
         } else {
             $fieldName = $entity->getPrimaryKey();
             $value = $param;
@@ -80,6 +80,7 @@ abstract class Entity
         if (!in_array($fieldName, $entity->getProperties())) {
             throw new OrmException(sprintf('Entity do not have property %s', $fieldName));
         }
+
         return self::findOneByField($entity, $fieldName, $value ?: null);
     }
 
@@ -88,6 +89,7 @@ abstract class Entity
         $class = static::class;
         /** @var Entity $entity */
         $entity = new $class();
+
         return self::findOneByField($entity);
     }
 
@@ -96,6 +98,7 @@ abstract class Entity
         $class = static::class;
         /** @var Entity $entity */
         $entity = new $class();
+
         return self::findOneByField($entity, null, null, 'DESC');
     }
 
@@ -124,7 +127,7 @@ abstract class Entity
     {
         // имя таблицы во множественном числе + s если не опеделено в классе
         if (empty($this->table)) {
-            $this->table = strtolower($this->getEntityClass()->getShortName()) . 's';
+            $this->table = strtolower($this->getEntityClass()->getShortName()).'s';
         }
 
         return $this->table;

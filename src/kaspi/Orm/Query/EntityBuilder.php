@@ -38,7 +38,6 @@ final class EntityBuilder
         $paramsData = new ParamsData($this->entity->getEntityDataParams());
 
         $format = 'UPDATE %s SET %s WHERE %s = :%s';
-        // TODO была когда-то реализация makeModelFilter поищи!
         $sql = sprintf(
             $format,
             $this->entity->getTable(),
@@ -109,12 +108,10 @@ final class EntityBuilder
     }
 
     /**
-     * @return \PDOStatement
-     *
      * @throws OrmException
      */
     public function select(
-        ?Filter $filter = null,
+        ?Where $where = null,
         ?Order $order = null,
         ?Group $group = null,
         ?Having $having = null,
@@ -124,9 +121,9 @@ final class EntityBuilder
         $format = 'SELECT %s, %s FROM %s';
         $sql = sprintf($format, $this->entity->getPrimaryKey(), $paramsData->getFields(), $this->entity->getTable());
         $stmData = [];
-        if ($filter && $strFilter = (string) $filter) {
-            $sql .= ' '.$strFilter;
-            $stmData += $filter->makeStmData();
+        if ($where && $strWhere = (string) $where) {
+            $sql .= ' '.$strWhere;
+            $stmData += $where->makeStmData();
         }
         if ($group && $strGroup = (string) $group) {
             $sql .= ' '.$strGroup;
@@ -141,6 +138,7 @@ final class EntityBuilder
         if ($limit && $strLimit = (string) $limit) {
             $sql .= ' '.$strLimit;
         }
+
         return $this->execute($sql, $stmData);
     }
 
@@ -152,25 +150,26 @@ final class EntityBuilder
     public function fetch(\PDOStatement $sth): Entity
     {
         $sth->setFetchMode(\PDO::FETCH_CLASS, get_class($this->entity));
+
         return $sth->fetch() ?: $this->entity;
     }
 
     /**
      * @throws OrmException
      */
-    public function count(?Filter $filter = null, ?Group $group = null): int
+    public function count(?Where $where = null, ?Group $group = null): int
     {
         $format = 'SELECT COUNT(%s) FROM %s';
         $sql = sprintf($format, $this->entity->getPrimaryKey(), $this->entity->getTable());
-        if ($filter && $strFilter = (string) $filter) {
-            $sql .= ' '.$strFilter;
+        if ($where && $strWhere = (string) $where) {
+            $sql .= ' '.$strWhere;
         }
         if ($group && $strGroup = (string) $group) {
             $sql .= ' '.$strGroup;
         }
         $sql .= ' LIMIT 1';
 
-        $stmData = $filter ? $filter->makeStmData() : [];
+        $stmData = $where ? $where->makeStmData() : [];
         $sth = $this->execute($sql, $stmData);
         $result = $sth->fetch(\PDO::FETCH_NUM)[0] ?? 0;
 
@@ -185,7 +184,7 @@ final class EntityBuilder
         // TODO придумай как обрабатывать ошибки
         $isSelect = 0 === stripos($sql, 'select ');
         try {
-            if ($isSelect === false && $this->useTransaction) {
+            if (false === $isSelect && $this->useTransaction) {
                 self::getPdo()->beginTransaction();
             }
             $sth = self::getPdo()->prepare($sql);
@@ -193,7 +192,7 @@ final class EntityBuilder
 
             return $sth;
         } catch (\PDOException $exception) {
-            if ($isSelect === false && $this->useTransaction) {
+            if (false === $isSelect && $this->useTransaction) {
                 self::getPdo()->rollBack();
             }
             throw new OrmException($exception->getMessage().PHP_EOL.$sql);

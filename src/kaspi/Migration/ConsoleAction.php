@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Kaspi\Migration;
 
-use function file_put_contents;
 use Kaspi\Config;
 use Kaspi\Db;
 use splitbrain\phpcli\CLI;
+use function file_put_contents;
 use function strtr;
 
 class ConsoleAction
@@ -117,6 +117,7 @@ class ConsoleAction
             $this->cli->success(sprintf(
                 'All migration applied. Spended time %01.4f seconds', (microtime(true) - $start)
             ));
+
             return;
         }
         // расхождение массива файлов миграций и примененных миграций (лежат в бд)
