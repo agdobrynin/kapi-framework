@@ -144,12 +144,12 @@ final class EntityBuilder
 
     public function fetchAll(\PDOStatement $sth): array
     {
-        return $sth->fetchAll(\PDO::FETCH_CLASS, get_class($this->entity)) ?: [];
+        return $sth->fetchAll(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, get_class($this->entity)) ?: [];
     }
 
     public function fetch(\PDOStatement $sth): Entity
     {
-        $sth->setFetchMode(\PDO::FETCH_CLASS, get_class($this->entity));
+        $sth->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, get_class($this->entity));
 
         return $sth->fetch() ?: $this->entity;
     }

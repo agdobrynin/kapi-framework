@@ -86,7 +86,7 @@ class Collection
      */
     public function getEntities(): \Iterator
     {
-        $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, get_class($this->entity));
+        $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, get_class($this->entity));
         while ($record = $this->pdoStatement->fetch()) {
             yield $record;
         }
