@@ -95,7 +95,7 @@ class Collection
     /**
      * Please use Collection::get for many result rows - it more effective, use Iterator through 'yield'.
      */
-    public function getArray(): array
+    public function toArray(): array
     {
         return $this->entity->getEntityBuilder()->fetchAll($this->pdoStatement);
     }
