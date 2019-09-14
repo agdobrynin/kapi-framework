@@ -2,6 +2,8 @@
 
 namespace Kaspi\Orm\Query;
 
+use Kaspi\Orm\OrmException;
+
 class Where
 {
     public const COMPARE_EQUAL = '=';
@@ -14,6 +16,8 @@ class Where
     public const COMPARE_IS_NULL = 'IS NULL';
     // при формировании sql убирать value и из массива значений  stm
     public const COMPARE_IS_NOT_NULL = 'IS NOT NULL';
+    public const COMPARE_IN = 'IN';
+    public const COMPARE_BETWEEN = 'BETWEEN';
 
     protected $arrWhere = [];
 
@@ -34,14 +38,68 @@ class Where
         if (!empty($field)) {
             $compare = $compare ?: self::COMPARE_EQUAL;
             $prefix = uniqid('', false).'_';
+            if (is_array($value)) {
+                $plaseholders = [];
+                foreach($value as $k => $val) {
+                    $plaseholders[] = ":{$prefix}{$k}_{$field}";
+                }
+                $param = $plaseholders;
+                if (self::COMPARE_IN === $compare) {
+                    $exp = "{$field} {$compare} (" . implode(', ', $plaseholders) . ")";
+                } elseif (2 === count($value) && self::COMPARE_BETWEEN === $compare) {
+                    $exp = "{$field} {$compare} " . implode(' AND ', $plaseholders);
+                } else {
+                    throw new OrmException(sprintf('Undefined compare operator %s', $compare));
+                }
+            } else {
+                $exp = "{$field} {$compare} :{$prefix}{$field}";
+                $param = ":{$prefix}{$field}";
+            }
+
             $this->arrWhere[] = [
-                'exp' => "{$field} {$compare} :{$prefix}{$field}",
+                'exp' => $exp,
                 'cond' => $condition ?: Condition::CONDITION_AND,
-                'param' => ":{$prefix}{$field}",
+                'param' => $param,
                 'value' => $value,
             ];
         }
 
+        return $this;
+    }
+
+    public function addIn(string $field, array $values, ?string $condition = null): self
+    {
+        $this->add($field, $values, self::COMPARE_IN, $condition);
+        return $this;
+    }
+
+    public function addInAnd(string $field, array $values): self
+    {
+        $this->add($field, $values, self::COMPARE_IN, Condition::CONDITION_AND);
+        return $this;
+    }
+
+    public function addInOr(string $field, array $values): self
+    {
+        $this->add($field, $values, self::COMPARE_IN, Condition::CONDITION_OR);
+        return $this;
+    }
+
+    public function addBetween(string $field, array $values, ?string $condition = null): self
+    {
+        $this->add($field, $values, self::COMPARE_BETWEEN, $condition);
+        return $this;
+    }
+
+    public function addBetweenAnd(string $field, array $values): self
+    {
+        $this->add($field, $values, self::COMPARE_BETWEEN, Condition::CONDITION_AND);
+        return $this;
+    }
+
+    public function addBetweenOr(string $field, array $values): self
+    {
+        $this->add($field, $values, self::COMPARE_BETWEEN, Condition::CONDITION_OR);
         return $this;
     }
 
@@ -88,7 +146,13 @@ class Where
     {
         $result = [];
         foreach ($this->arrWhere as $index => $where) {
-            $result[$where['param']] = $where['value'];
+            if (is_array($where['param'])) {
+                foreach ($where['param'] as $key => $param) {
+                    $result[$param] = $where['value'][$key];
+                }
+            } else {
+                $result[$where['param']] = $where['value'];
+            }
         }
 
         return $result;
