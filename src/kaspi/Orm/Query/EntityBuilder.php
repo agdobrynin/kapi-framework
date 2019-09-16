@@ -35,7 +35,7 @@ final class EntityBuilder
     public function update(): bool
     {
         $this->checkPrimaryKey();
-        $paramsData = new ParamsData($this->entity->getEntityDataParams());
+        $paramsData = new ParamsData($this->entity);
 
         $format = 'UPDATE %s SET %s WHERE %s = :%s';
         $sql = sprintf(
@@ -61,7 +61,7 @@ final class EntityBuilder
      */
     public function insert(): bool
     {
-        $paramsData = new ParamsData($this->entity->getEntityDataParams());
+        $paramsData = new ParamsData($this->entity);
         $format = 'INSERT INTO %s (%s) VALUES(%s)';
         $sql = sprintf($format, $this->entity->getTable(), $paramsData->getFields(), $paramsData->getValues());
 
@@ -117,7 +117,7 @@ final class EntityBuilder
         ?Having $having = null,
         ?Limit $limit = null
     ): \PDOStatement {
-        $paramsData = new ParamsData($this->entity->getEntityDataParams());
+        $paramsData = new ParamsData($this->entity);
         $format = 'SELECT %s, %s FROM %s';
         $sql = sprintf($format, $this->entity->getPrimaryKey(), $paramsData->getFields(), $this->entity->getTable());
         $stmData = [];

@@ -2,6 +2,8 @@
 
 namespace Kaspi\Orm\Query;
 
+use Kaspi\Orm\Entity;
+
 class ParamsData
 {
     protected $sourceData;
@@ -9,10 +11,12 @@ class ParamsData
     protected $values;
     protected $insert;
     protected $stmData;
+    protected $entity;
 
-    public function __construct(array $data)
+    public function __construct(Entity $entity)
     {
-        $this->sourceData = $data;
+        $this->sourceData = $entity->getEntityDataParams();
+        $this->entity = $entity;
     }
 
     /**
@@ -73,8 +77,8 @@ class ParamsData
 
     protected function getParamsData(): void
     {
-        $this->fields = implode(', ', array_keys($this->sourceData));
         $keys = array_keys($this->sourceData);
+        $this->fields = $tbaleAlias. implode(', ', $keys);
         $template = array_map(
             function ($key) {
                 return ":{$key}";
