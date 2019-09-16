@@ -78,7 +78,7 @@ class ParamsData
     protected function getParamsData(): void
     {
         $keys = array_keys($this->sourceData);
-        $this->fields = $tbaleAlias. implode(', ', $keys);
+        $this->fields = implode(', ', $keys);
         $template = array_map(
             function ($key) {
                 return ":{$key}";
