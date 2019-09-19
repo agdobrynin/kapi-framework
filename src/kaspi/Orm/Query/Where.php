@@ -43,7 +43,6 @@ class Where
                 foreach($value as $k => $val) {
                     $plaseholders[] = ":{$prefix}{$k}_{$field}";
                 }
-                $param = $plaseholders;
                 if (self::COMPARE_IN === $compare) {
                     $exp = "{$field} {$compare} (" . implode(', ', $plaseholders) . ")";
                 } elseif (2 === count($value) && self::COMPARE_BETWEEN === $compare) {
@@ -53,13 +52,13 @@ class Where
                 }
             } else {
                 $exp = "{$field} {$compare} :{$prefix}{$field}";
-                $param = ":{$prefix}{$field}";
+                $plaseholders = ":{$prefix}{$field}";
             }
 
             $this->arrWhere[] = [
                 'exp' => $exp,
                 'cond' => $condition ?: Condition::CONDITION_AND,
-                'param' => $param,
+                'plaseholders' => $plaseholders,
                 'value' => $value,
             ];
         }
@@ -146,12 +145,12 @@ class Where
     {
         $result = [];
         foreach ($this->arrWhere as $index => $where) {
-            if (is_array($where['param'])) {
-                foreach ($where['param'] as $key => $param) {
-                    $result[$param] = $where['value'][$key];
+            if (is_array($where['plaseholders'])) {
+                foreach ($where['plaseholders'] as $key => $plaseholder) {
+                    $result[$plaseholder] = $where['value'][$key];
                 }
             } else {
-                $result[$where['param']] = $where['value'];
+                $result[$where['plaseholders']] = $where['value'];
             }
         }
 
