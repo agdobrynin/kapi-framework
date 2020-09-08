@@ -6,6 +6,8 @@ class Request
 {
     /** @var array */
     protected $request;
+    /** @var array */
+    private $queryString;
     /** @var array из $_SERVER */
     protected $server;
     /** @var array из $_COOKIE */
@@ -40,7 +42,7 @@ class Request
 
     protected function getRequestInput(): void
     {
-        // GET или POST из глобальных переменных PHP
+        // в зависимости от метода запроса GET или POST из глобальных переменных PHP
         if ($this->isPost()) {
             $this->request = $_POST;
 
@@ -131,6 +133,26 @@ class Request
         }
 
         return $this->request[$key] ?? null;
+    }
+
+    public function getQueryParam(string $key): ?string
+    {
+        // Отдально запросить Query String так как может существовать совместно с другими методами
+        if (null === $this->queryString) {
+            $this->queryString = $_GET;
+        }
+
+        return $this->queryString[$key] ?? null;
+    }
+
+    public function getQueryParams(string ...$keys): ?array
+    {
+        $result = null;
+        foreach ($keys as $key) {
+            $result[$key] = $this->getQueryParam($key);
+        }
+
+        return $result;
     }
 
     public function getParams(string ...$keys): ?array
