@@ -33,10 +33,10 @@ class Response
 
     public function setHeader(string $header, string $value): self
     {
-        $clone = clone $this;
-        $clone->headers->set($header, $value);
+        $this->headers = clone $this->headers;
+        $this->headers->set($header, $value);
 
-        return $clone;
+        return $this;
     }
 
     public function getHeader(string $header): ?string
@@ -51,10 +51,10 @@ class Response
 
     public function setBody(string $body = ''): self
     {
-        $clone = clone $this;
+        $this->body = clone $this->body;
         $this->body->write($body);
 
-        return $clone;
+        return $this;
     }
 
     public function getBody(): ?string
