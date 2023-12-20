@@ -70,20 +70,20 @@ class View
      * если параметры есть
      * $this->getExtension('my-ext', 'param1' [[, 'param2'], ...]);
      *
-     * @return mixed|null
+     * @return null|mixed
      */
     public function getExtension(string $extName, ...$arg)
     {
-        if (!empty($this->extensions[$extName])) {
-            $func = $this->extensions[$extName];
-            if (count($arg)) {
-                return $func(...$arg);
-            }
-
-            return $func();
+        if (empty($this->extensions[$extName])) {
+            return null;
         }
 
-        return null;
+        $func = $this->extensions[$extName];
+        if (count($arg)) {
+            return $func(...$arg);
+        }
+
+        return $func();
     }
 
     public function getExt(string $extName, ...$arg)
@@ -92,7 +92,7 @@ class View
     }
 
     /**
-     * @deprecated Будет запрещена в следующих версиях.
+     * @deprecated будет запрещена в следующих версиях
      * @see View::shareData()
      */
     public function addGlobalData(string $key, $data): void
@@ -129,7 +129,7 @@ class View
      * @param array  $data   переменные передаваемые в шаблон
      */
     protected function layout(string $layout, array $data = []): void
-    {;
+    {
         $this->layout->template = $layout;
         $this->layout->data = $data;
     }

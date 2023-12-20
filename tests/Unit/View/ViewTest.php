@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 class ViewTest extends TestCase
 {
-    /** @var Config  */
+    /** @var Config */
     protected $config = null;
 
     protected function setUp(): void
@@ -18,7 +18,7 @@ class ViewTest extends TestCase
             'view' => [
                 'path' => __DIR__.'/../../templates',
                 'useExtension' => false,
-            ]
+            ],
         ]);
     }
 
@@ -37,11 +37,11 @@ class ViewTest extends TestCase
     {
         $view = new View($this->config);
 
-        $res1 = $view->addExtension('sum', static function(): string { return mt_rand();});
+        $res1 = $view->addExtension('sum', static function (): string { return mt_rand(); });
 
         $this->assertTrue($res1);
 
-        $res1 = $view->addExtension('sum', static function(): string {return mt_rand();});
+        $res1 = $view->addExtension('sum', static function (): string {return mt_rand(); });
 
         $this->assertFalse($res1);
     }
@@ -66,7 +66,7 @@ class ViewTest extends TestCase
         $this->assertTrue($res1);
         $this->assertTrue($res2);
 
-        $this->assertEquals(6, $view->getExt('sum', [1,2, 3]));
+        $this->assertEquals(6, $view->getExt('sum', [1, 2, 3]));
         $this->assertEquals(3.14, $view->getExtension('pi'));
         $this->assertNull($view->getExt('not-defined-extension'));
     }

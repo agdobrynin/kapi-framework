@@ -1,2 +1,3 @@
 <?php
-echo 'made by me - ' . $shareText;
+
+echo 'made by me - '.$shareText;
