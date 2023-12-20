@@ -133,12 +133,15 @@ class Config
     public function getLocale(): array
     {
         $locale = $this->config['locale']['locale'] ?? '';
+
         if (is_string($locale)) {
             return [$locale];
         }
+
         if (is_array($locale)) {
             return $locale;
         }
+
         throw new ConfigException('Config for set locale is wrong');
     }
 }

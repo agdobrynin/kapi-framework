@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Config;
+namespace Tests\Unit\Config;
 
 use Kaspi\Config;
 use Kaspi\Exception\Core\ConfigException;
@@ -11,9 +11,9 @@ class ConfigTest extends TestCase
     public function testEmptyConfig(): void
     {
         $config = new Config([]);
+
         $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('DSN for database is empty');
-        $this->expectExceptionMessage('Path to templates for Kaspi\View is undefined');
 
         $this->assertFalse($config->displayErrorDetails());
         $this->assertNull($config->getDbUser());
@@ -31,8 +31,16 @@ class ConfigTest extends TestCase
         $this->assertEquals(LC_ALL, $config->getLocaleCategory());
         $this->assertEquals([''], $config->getLocale());
 
-        $config->getViewPath();
         $config->getDbDsnConfig();
+    }
+
+    public function testLocale(): void
+    {
+        $config = new Config(['locale' => ['locale' => 10]]);
+
+        $this->expectException(ConfigException::class);
+
+        $config->getLocale();
     }
 
     public function testFullConfig(): void
@@ -77,9 +85,9 @@ class ConfigTest extends TestCase
         $this->assertEquals('root', $config->getDbUser());
         $this->assertEquals('password', $config->getDbPassword());
         $this->assertEquals([\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION], $config->getDbOptions());
-        $this->assertStringEndsWith('/tests/Config/', $config->getMigrationPath());
+        $this->assertStringEndsWith('/tests/Unit/Config/', $config->getMigrationPath());
         $this->assertEquals('migrations', $config->getMigrationTable());
-        $this->assertStringEndsWith('tests/Config', $config->getViewPath());
+        $this->assertStringEndsWith('tests/Unit/Config', $config->getViewPath());
         $this->assertIsArray($config->getViewConf());
         $this->assertEquals('php', $config->getViewConf()['useExtension']);
         $this->assertTrue($config->getViewUseTemplateExtension());
@@ -99,7 +107,7 @@ class ConfigTest extends TestCase
         $this->assertNull($config->getMigrationPath());
 
         $config = new Config(['db' => ['migration' => ['path' => __DIR__]]]);
-        $this->assertStringEndsWith('tests/Config/', $config->getMigrationPath());
+        $this->assertStringEndsWith('tests/Unit/Config/', $config->getMigrationPath());
     }
 
     public function testRealPathForViewIsFailed(): void
@@ -114,7 +122,7 @@ class ConfigTest extends TestCase
     {
         $config = new Config(['view' => ['path' => __DIR__]]);
 
-        $this->assertStringEndsWith('tests/Config', $config->getViewPath());
+        $this->assertStringEndsWith('tests/Unit/Config', $config->getViewPath());
     }
 
     public function testSetters(): void
