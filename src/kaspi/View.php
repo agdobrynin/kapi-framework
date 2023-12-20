@@ -21,11 +21,13 @@ class View
     public function __construct(Config $config)
     {
         $this->config = $config;
+
         try {
             $this->viewPath = realpath($config->getViewPath()).'/';
         } catch (ConfigException $exception) {
             throw new ViewException($exception->getMessage());
         }
+
         $this->useExtension = $config->getViewUseTemplateExtension();
     }
 
@@ -35,7 +37,7 @@ class View
     }
 
     /**
-     * Позволяет добавить \Closure объект и выолнить с помощью View::getExtension.
+     * Позволяет добавить \Closure объект и выполнить с помощью View::getExtension.
      *
      * $view = new View(...);
      * $view->addExtension('my-ext', function(?$param) {
@@ -52,7 +54,7 @@ class View
             return true;
         }
 
-        return null;
+        return false;
     }
 
     public function addExt(string $extName, callable $callable): bool
@@ -70,7 +72,7 @@ class View
      *
      * @return \Closure|null
      */
-    public function getExtension(string $extName, ...$arg)
+    public function getExtension(string $extName, ...$arg): ?\Closure
     {
         if (!empty($this->extensions[$extName])) {
             $func = $this->extensions[$extName];
@@ -81,7 +83,7 @@ class View
             }
         }
 
-        return;
+        return null;
     }
 
     public function getExt(string $extName, ...$arg)
@@ -104,6 +106,7 @@ class View
 
             return;
         }
+
         throw new ViewException('Include template does not exist: '.$template);
     }
 
@@ -113,7 +116,7 @@ class View
      * @param string $layout путь к расширяемому шаблону
      * @param array  $data   переменные передаваемые в шаблон
      */
-    private function layout(string $layout, array $data = []): void
+    public function layout(string $layout, array $data = []): void
     {
         $this->layout->template = $layout;
         $this->layout->data = $data;
@@ -124,45 +127,54 @@ class View
      *
      * @param string $sectionName Имя секции отличное от дефолтной
      */
-    private function sectionStart(string $sectionName): void
+    public function sectionStart(string $sectionName): void
     {
         ob_start();
         $this->sections[$sectionName] = '';
     }
 
-    private function sectionEnd()
+    public function sectionEnd(): void
     {
         $lastSectionName = key(array_slice($this->sections, -1, 1, true));
         $this->sections[$lastSectionName] = ob_get_contents();
         ob_end_clean();
     }
 
-    private function section(?string $sectionName = null): void
+    public function section(?string $sectionName = null): void
     {
         if (empty($sectionName)) {
             $sectionName = self::DEFAULT_SECTION;
         }
+
         echo $this->sections[$sectionName];
     }
 
     public function render(string $template, array $data = []): string
     {
         $template = $this->viewPath.$template.($this->useExtension ? '' : '.php');
+
         if (file_exists($template)) {
             $this->layout = new \StdClass();
             $data = array_merge($data, $this->globalData);
             extract($data, EXTR_OVERWRITE);
+
             ob_start();
+
             include $template;
+
             $this->sections[self::DEFAULT_SECTION] = ob_get_contents();
+
             if (!empty($this->layout->template)) {
                 $this->render($this->layout->template, array_merge($data, $this->layout->data));
             }
+
             $content = $this->sections[self::DEFAULT_SECTION];
+
             ob_end_clean();
 
             return $content;
         }
+
         throw new ViewException('View does not exist: '.$template);
     }
 }
