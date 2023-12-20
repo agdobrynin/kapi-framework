@@ -28,7 +28,9 @@
   },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^2.15",
-    "roave/security-advisories": "dev-master"
+    "roave/security-advisories": "dev-master",
+    "phpunit/phpunit": "^8.5",
+    "pcov/clobber": "^2.0"
   },
   "scripts": {
     "fixer" : "sh vendor/bin/php-cs-fixer fix"
