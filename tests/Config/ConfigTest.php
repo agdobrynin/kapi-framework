@@ -1,6 +1,6 @@
 <?php
 
-namespace tests;
+namespace Tests\Config;
 
 use Kaspi\Config;
 use Kaspi\Exception\Core\ConfigException;
@@ -77,9 +77,9 @@ class ConfigTest extends TestCase
         $this->assertEquals('root', $config->getDbUser());
         $this->assertEquals('password', $config->getDbPassword());
         $this->assertEquals([\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION], $config->getDbOptions());
-        $this->assertStringEndsWith('/tests/', $config->getMigrationPath());
+        $this->assertStringEndsWith('/tests/Config/', $config->getMigrationPath());
         $this->assertEquals('migrations', $config->getMigrationTable());
-        $this->assertStringEndsWith('tests', $config->getViewPath());
+        $this->assertStringEndsWith('tests/Config', $config->getViewPath());
         $this->assertIsArray($config->getViewConf());
         $this->assertEquals('php', $config->getViewConf()['useExtension']);
         $this->assertTrue($config->getViewUseTemplateExtension());
@@ -99,7 +99,7 @@ class ConfigTest extends TestCase
         $this->assertNull($config->getMigrationPath());
 
         $config = new Config(['db' => ['migration' => ['path' => __DIR__]]]);
-        $this->assertStringEndsWith('tests/', $config->getMigrationPath());
+        $this->assertStringEndsWith('tests/Config/', $config->getMigrationPath());
     }
 
     public function testRealPathForViewIsFailed(): void
@@ -114,7 +114,7 @@ class ConfigTest extends TestCase
     {
         $config = new Config(['view' => ['path' => __DIR__]]);
 
-        $this->assertStringEndsWith('tests', $config->getViewPath());
+        $this->assertStringEndsWith('tests/Config', $config->getViewPath());
     }
 
     public function testSetters(): void

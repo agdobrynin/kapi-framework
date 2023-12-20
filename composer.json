@@ -26,6 +26,11 @@
       "src/kaspi/helpers/helpers.php"
     ]
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^2.15",
     "roave/security-advisories": "dev-master",
