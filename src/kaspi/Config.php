@@ -59,7 +59,13 @@ class Config
 
     public function getMigrationPath(): ?string
     {
-        return realpath($this->config['db']['migration']['path']).DIRECTORY_SEPARATOR ?? null;
+        if (empty($this->config['db']['migration']['path'])) {
+            return null;
+        }
+
+        $realPath = realpath($this->config['db']['migration']['path']);
+
+        return $realPath ? $realPath.DIRECTORY_SEPARATOR : null;
     }
 
     public function getMigrationTable(): ?string
@@ -70,14 +76,18 @@ class Config
     public function getViewPath(): ?string
     {
         $path = $this->config['view']['path'] ?: null;
+
         if (empty($path)) {
             throw new ConfigException('Path to templates for Kaspi\View is undefined');
         }
-        if (!is_dir($path)) {
-            throw new ConfigException(sprintf('Directory `%s` for templates not found', $path));
+
+        $realPath = realpath($path);
+
+        if (is_dir($realPath)) {
+            return $realPath;
         }
 
-        return $path;
+        throw new ConfigException(sprintf('Directory `%s` for templates not found', $path));
     }
 
     public function getViewUseTemplateExtension(): bool
@@ -87,7 +97,7 @@ class Config
 
     public function getViewConf(): ?array
     {
-        return $this->config['view'];
+        return $this->config['view'] ?? null;
     }
 
     public function getCsrfTtl(): ?int
