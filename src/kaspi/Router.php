@@ -264,22 +264,9 @@ final class Router
         }
 
         if (isset($isValidRout)) {
-            throw new MethodNotAllowed(
-                sprintf(
-                    'Method %s not allowed at route %s',
-                    $this->request->getRequestMethod(),
-                    $this->request->uri()
-                ),
-                ResponseCode::METHOD_NOT_ALLOWED
-            );
+            throw new MethodNotAllowed(sprintf('Method %s not allowed at route %s', $this->request->getRequestMethod(), $this->request->uri()), ResponseCode::METHOD_NOT_ALLOWED);
         }
 
-        throw new NotFound(
-            sprintf(
-                'The requested resource %s could not be found. Please verify the URI and try again',
-                $this->request->uri()
-            ),
-            ResponseCode::NOT_FOUND
-        );
+        throw new NotFound(sprintf('The requested resource %s could not be found. Please verify the URI and try again', $this->request->uri()), ResponseCode::NOT_FOUND);
     }
 }

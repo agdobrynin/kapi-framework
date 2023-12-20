@@ -205,13 +205,7 @@ final class EntityBuilder
     private function checkPrimaryKey(): void
     {
         if (empty($this->entity->id)) {
-            throw new OrmException(
-                sprintf(
-                    'Entity for table %s have empty primary key %s',
-                    $this->entity->getTable(),
-                    $this->entity->getPrimaryKey()
-                )
-            );
+            throw new OrmException(sprintf('Entity for table %s have empty primary key %s', $this->entity->getTable(), $this->entity->getPrimaryKey()));
         }
     }
 }

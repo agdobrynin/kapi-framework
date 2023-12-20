@@ -68,7 +68,6 @@ class View
      * если параметры есть
      * $this->getExtension('my-ext', 'param1' [[, 'param2'], ...]);
      *
-     *
      * @return \Closure|null
      */
     public function getExtension(string $extName, ...$arg)

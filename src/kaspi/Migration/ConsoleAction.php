@@ -68,9 +68,7 @@ class ConsoleAction
         $pathMigrations = $this->config->getMigrationPath();
         $className = Utils::migrationClassName($name);
         if (!$className) {
-            throw new MigrationException(
-                sprintf('%s - Use only alphabetical symbols for migration name', $name)
-            );
+            throw new MigrationException(sprintf('%s - Use only alphabetical symbols for migration name', $name));
         }
         // Проверка на существование миграции
         $arrMigration = Utils::migrationMap($pathMigrations);
@@ -87,11 +85,7 @@ class ConsoleAction
         $content = strtr($content, $classes);
         $fileName = Utils::migrationFileName($migrationVersion, $className);
         if (!$fileName) {
-            throw new MigrationException(sprintf(
-                    'Wrong parameners for migration file name : vesrion %s, class name %s',
-                    $migrationVersion,
-                    $className)
-            );
+            throw new MigrationException(sprintf('Wrong parameners for migration file name : vesrion %s, class name %s', $migrationVersion, $className));
         }
         $file = $pathMigrations.$fileName;
         // TODO работать надо с бинарнобезопасной записью

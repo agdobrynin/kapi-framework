@@ -8,9 +8,9 @@ class Request
     protected $request;
     /** @var array */
     private $queryString;
-    /** @var array из $_SERVER */
+    /** @var array из */
     protected $server;
-    /** @var array из $_COOKIE */
+    /** @var array из */
     protected $cookie;
     /** @var array */
     protected $headers;
