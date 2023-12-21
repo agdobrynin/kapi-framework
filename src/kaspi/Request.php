@@ -2,6 +2,8 @@
 
 namespace Kaspi;
 
+use Kaspi\Exception\RequestException;
+
 class Request
 {
     /** @var array */
@@ -42,6 +44,10 @@ class Request
 
     protected function getRequestInput(): void
     {
+        if (!$this->isValidRequestMethod()) {
+            throw new RequestException("Method \"{$this->getRequestMethod()}\" in request not implemented");
+        }
+
         // в зависимости от метода запроса GET или POST из глобальных переменных PHP
         if ($this->isPost()) {
             $this->request = $_POST;
@@ -56,13 +62,9 @@ class Request
         }
 
         // PUT, PATCH, DELETE
-        if ($this->isPut() || $this->isPatch() || $this->isDelete()) {
-            $this->request = [];
-            $inputSource = file_get_contents('php://input');
-            parse_str($inputSource, $this->request);
-
-            return;
-        }
+        $this->request = [];
+        $inputSource = file_get_contents('php://input');
+        parse_str($inputSource, $this->request);
     }
 
     public function getRequestMethod(): string
@@ -126,6 +128,9 @@ class Request
         return $this->cookie[$key] ?? null;
     }
 
+    /**
+     * @throws RequestException
+     */
     public function getParam(string $key): ?string
     {
         if (null === $this->request) {

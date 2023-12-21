@@ -3,8 +3,6 @@
 namespace Kaspi;
 
 use Kaspi\Exception\AppErrorHandler;
-use Kaspi\Exception\Core\AppException;
-use Kaspi\Exception\Core\ContainerException;
 use Kaspi\Exception\Router\MethodNotAllowed;
 use Kaspi\Exception\Router\NotFound;
 use function date_default_timezone_set;
@@ -25,43 +23,35 @@ class App
     /** @var Router */
     private $router;
 
-    public function __construct(Config $config, ?Request $request = null, ?Response $response = null, ?Container $container = null)
+    public function __construct(
+        Config    $config,
+        Container $container,
+        Request   $request,
+        Response  $response,
+        Router    $router
+    )
     {
-        if (null === $container) {
-            $container = new Container();
-        }
         $this->container = $container;
 
         $this->config = $config;
         $this->container->set(Config::class, static function () use ($config) {
             return $config;
         });
-
-        if (null === $request) {
-            $request = new Request();
-        }
         $this->request = $request;
+
         $this->container->set(Request::class, static function () use ($request) {
             return $request;
         });
 
-        if (null === $response) {
-            $response = new Response();
-        }
         $this->response = $response;
         $this->container->set(Response::class, static function () use ($response) {
             return $response;
         });
 
-        // Router помещаем в контейнер чтобы можно было использовать его например в контроллерах и милварах
-        try {
-            $this->container->set(Router::class, static function () use ($request, $response, $container): Router {
-                return new Router($request, $response, $container);
-            });
-            $this->router = $this->container->get(Router::class);
-        } catch (ContainerException $exception) {
-            throw new AppException($exception->getMessage(), $exception->getCode(), $exception);
-        }
+        $this->router = $router;
+        $this->container->set(Router::class, static function () use ($router) {
+            return $router;
+        });
     }
 
     public function getContainer(): Container

@@ -2,12 +2,10 @@
 
 namespace Kaspi;
 
-use Kaspi\Exception\Core\ConfigException;
 use Kaspi\Exception\Core\ViewException;
 
 class View
 {
-    private $config;
     private $viewPath;
     private $sharedData = [];
     private $layout;
@@ -18,22 +16,18 @@ class View
 
     public const DEFAULT_SECTION = 'content';
 
-    public function __construct(Config $config)
+    public function __construct(string $viewPath, bool $useExtension)
     {
-        $this->config = $config;
+        $this->useExtension = $useExtension;
+        $path = realpath($viewPath);
 
-        try {
-            $this->viewPath = realpath($config->getViewPath()).'/';
-        } catch (ConfigException $exception) {
-            throw new ViewException($exception->getMessage());
+        if ($viewPath && is_dir($path)) {
+            $this->viewPath = $path . DIRECTORY_SEPARATOR;
+
+            return;
         }
 
-        $this->useExtension = $config->getViewUseTemplateExtension();
-    }
-
-    public function getConfig(): Config
-    {
-        return $this->config;
+        throw new ViewException('View path is not valid: ' . $viewPath);
     }
 
     /**
@@ -41,7 +35,7 @@ class View
      *
      * $view = new View(...);
      * $view->addExtension('my-ext', function(?$param) {
-     *      // Closure функция модет быть и без параметров,
+     *      // Closure функция может быть и без параметров,
      *      // но если они нужны их надо объявить они понадобятся при вызове
      *      // здесь код функции
      * });

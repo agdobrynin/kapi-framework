@@ -30,7 +30,12 @@ final class Router
     private const ROUTE_PATTERN = 'ROUTE_PATTERN';
     private const ROUTE_MIDDLEWARE = 'ROUTE_MIDDLEWARE';
 
-    public function __construct(Request $request, Response $response, Container $container, ?Config $config = null)
+    public function __construct(
+        Request $request,
+        Response $response,
+        Container $container,
+        ?Config $config = null
+    )
     {
         $this->routes = [];
         $this->middleware = [];
@@ -55,7 +60,7 @@ final class Router
                 $pattern = $this->routes[$key][self::ROUTE_PATTERN];
                 $route = $pattern;
                 preg_replace_callback('@\(?<([^<]+)?\)@', static function ($matches) use ($args, &$route, $routeName) {
-                    if (1 === preg_match('@\<([^>]*)>@i', $matches[0], $expr)) {
+                    if (1 === preg_match('@<([^>]*)>@', $matches[0], $expr)) {
                         if (false === isset($args[$expr[1]])) {
                             throw new RouterException(sprintf('Undefined parameter "%s" for route name "%s"', $expr[1], $routeName));
                         }
@@ -173,7 +178,7 @@ final class Router
                 $controller = strstr($callable, $this->defaultActionSymbol, true);
                 $method = substr(strrchr($callable, $this->defaultActionSymbol), 1);
                 if (!class_exists($controller)) {
-                    throw new RouterException(sprintf('Сontroller `%s` not defined', $controller));
+                    throw new RouterException(sprintf('Controller `%s` not defined', $controller));
                 }
                 if (!method_exists($controller, $method)) {
                     throw new RouterException(sprintf('Method `%s` at controller `%s` not defined', $method, $controller));

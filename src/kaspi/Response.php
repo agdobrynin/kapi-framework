@@ -9,10 +9,10 @@ class Response
     protected $statusCode;
     protected $responsePhrase;
 
-    public function __construct()
+    public function __construct(ResponseBody $responseBody, ResponseHeaders $responseHeaders)
     {
-        $this->body = new ResponseBody();
-        $this->headers = new ResponseHeaders();
+        $this->body = $responseBody;
+        $this->headers = $responseHeaders;
         $this->statusCode = ResponseCode::OK;
         $this->responsePhrase = ResponseCode::PHRASES[$this->statusCode] ?? '';
     }

@@ -73,7 +73,7 @@ class Config
         return $this->config['db']['migration']['table'] ?? null;
     }
 
-    public function getViewPath(): ?string
+    public function getViewPath(): string
     {
         $path = $this->config['view']['path'] ?: null;
 

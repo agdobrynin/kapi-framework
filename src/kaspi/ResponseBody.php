@@ -2,7 +2,9 @@
 
 namespace Kaspi;
 
-class ResponseBody
+use Kaspi\Interfaces\ResponseBodyInterface;
+
+class ResponseBody implements ResponseBodyInterface
 {
     protected $size;
     protected $stream;

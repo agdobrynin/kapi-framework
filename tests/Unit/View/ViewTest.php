@@ -2,40 +2,21 @@
 
 namespace Tests\Unit\View;
 
-use Kaspi\Config;
 use Kaspi\Exception\Core\ViewException;
 use Kaspi\View;
 use PHPUnit\Framework\TestCase;
 
 class ViewTest extends TestCase
 {
-    /** @var Config */
-    protected $config = null;
-
-    protected function setUp(): void
-    {
-        $this->config = new Config([
-            'view' => [
-                'path' => __DIR__.'/../../templates',
-                'useExtension' => false,
-            ],
-        ]);
-    }
-
     public function testEmptyConfigFail(): void
     {
         $this->expectException(ViewException::class);
-        new View(new Config([]));
-    }
-
-    public function testSuccessConstructor(): void
-    {
-        $this->assertEquals($this->config, (new View($this->config))->getConfig());
+        new View('', true);
     }
 
     public function testAddExtension(): void
     {
-        $view = new View($this->config);
+        $view = new View(__DIR__ . '/../../templates', true);
 
         $res1 = $view->addExtension('sum', static function (): string { return mt_rand(); });
 
@@ -48,7 +29,7 @@ class ViewTest extends TestCase
 
     public function testAddExtensionAndGetExtension(): void
     {
-        $view = new View($this->config);
+        $view = new View(__DIR__ . '/../../templates', true);
         $res1 = $view->addExtension(
             'sum',
             static function (array $nums): int {
@@ -73,33 +54,33 @@ class ViewTest extends TestCase
 
     public function testGlobalData(): void
     {
-        $view = new View($this->config);
+        $view = new View(__DIR__ . '/../../templates', true);
         $view->addGlobalData('hello', 'Hello world');
-        $content = $view->render('template_for_global_data');
+        $content = $view->render('template_for_global_data.php');
 
         $this->assertEquals('Hello world', $content);
 
         $view->addGlobalData('hello', 'Hello php');
-        $content = $view->render('template_for_global_data');
+        $content = $view->render('template_for_global_data.php');
         $this->assertEquals('Hello php', $content);
     }
 
     public function testShareData(): void
     {
-        $view = new View($this->config);
+        $view = new View(__DIR__ . '/../../templates', true);
         $view->shareData('hello', 'Hello world');
-        $content = $view->render('template_for_global_data');
+        $content = $view->render('template_for_global_data.php');
 
         $this->assertEquals('Hello world', $content);
 
         $view->shareData('hello', 'Hello php');
-        $content = $view->render('template_for_global_data');
+        $content = $view->render('template_for_global_data.php');
         $this->assertEquals('Hello php', $content);
     }
 
     public function testIncludeInTemplate(): void
     {
-        $view = new View($this->config);
+        $view = new View(__DIR__ . '/../../templates', false);
         $view->shareData('shareText', 'into PHPUnit');
         $content = $view->render('template_with_include');
 
@@ -108,7 +89,7 @@ class ViewTest extends TestCase
 
     public function testIncludeInTemplateNotFound(): void
     {
-        $view = new View($this->config);
+        $view = new View(__DIR__ . '/../../templates', false);
 
         $this->expectException(ViewException::class);
         $this->expectExceptionMessage('Include template does not exist');
@@ -118,7 +99,7 @@ class ViewTest extends TestCase
 
     public function testTemplateNotFound(): void
     {
-        $view = new View($this->config);
+        $view = new View(__DIR__ . '/../../templates', false);
 
         $this->expectException(ViewException::class);
         $this->expectExceptionMessage('View does not exist: template_not_found');
@@ -128,7 +109,7 @@ class ViewTest extends TestCase
 
     public function testLayoutDefaultSection(): void
     {
-        $view = new View($this->config);
+        $view = new View(__DIR__ . '/../../templates', false);
         $content = $view->render('template_extended_layout_main_default');
 
         $this->assertEquals(
@@ -139,7 +120,7 @@ class ViewTest extends TestCase
 
     public function testLayoutNamedSection(): void
     {
-        $view = new View($this->config);
+        $view = new View(__DIR__ . '/../../templates', false);
         $content = $view->render('template_extended_layout_main_section_js');
 
         $this->assertEquals('<script>alert(1);</script>', $content);

@@ -19,6 +19,13 @@ class Container
         return $this->get($name);
     }
 
+    /**
+     * @param string $name
+     * @param mixed $container
+     * @return void
+     *
+     * @throws ContainerException
+     */
     public function __set(string $name, $container): void
     {
         $this->set($name, $this->container);
@@ -29,6 +36,13 @@ class Container
         return $this->has($name);
     }
 
+    /**
+     * @param string $name
+     * @param mixed $container
+     * @return void
+     *
+     * @throws ContainerException
+     */
     public function set(string $name, $container): void
     {
         if ($this->has($name)) {
@@ -46,6 +60,7 @@ class Container
 
             return $this->resolvedContainer[$name];
         }
+
         throw new ContainerException("Container '{$name}' not registered");
     }
 
